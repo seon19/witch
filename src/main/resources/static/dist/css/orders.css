@@ -1,0 +1,7 @@
+body {
+	background-image: url('/dist/images/상점_메인_구매.png');
+	background-size: cover;
+	background-repeat: no-repeat;
+	background-position: center center;
+	background-attachment: fixed;
+}
