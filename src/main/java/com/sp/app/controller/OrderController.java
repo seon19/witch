@@ -29,7 +29,7 @@ public class OrderController {
 			log.info("list: ", e);
 		}
 		
-		return "orders/list";
+		return "orders/purchaseList";
 	}
 	
 
