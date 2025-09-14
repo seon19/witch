@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.sp.app.common.MyUtil;
-import com.sp.app.service.OrderService;
+import com.sp.app.service.HomeService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,13 +13,12 @@ import lombok.extern.slf4j.Slf4j;
 @Controller
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/orders/*")
-public class orderController {
+public class HomeController {
 	
-	private final OrderService service;
+	private final HomeService service;
 	private final MyUtil myUtil;
 	
-	@GetMapping("list")
+	@GetMapping("/")
 	public String list() throws Exception {
 		
 		try {
@@ -29,7 +28,7 @@ public class orderController {
 			log.info("list: ", e);
 		}
 		
-		return "orders/list";
+		return "main/home";
 	}
 	
 
