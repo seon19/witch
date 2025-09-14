@@ -8,9 +8,16 @@
 </head>
 <body>
 
-<div>
-	<div th:replace="~{/admin/menubar}"></div>
-
+<div class="main-container">
+	<div th:replace="~{/admin/menubar :: menubarFragment}"></div>
+	
+	<div class="body-container">
+		<div class="title-container">
+			<span>대시보드</span>
+		</div>
+	
+	</div>
+	
 
 </div>
 

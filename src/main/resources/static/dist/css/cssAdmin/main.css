@@ -79,3 +79,14 @@ body {
 	padding: 5px 10px;
 	border-radius: 5px;
 }
+
+.body-container {
+  margin-left: 250px;
+  padding: 30px;
+}
+
+.body-container .title-container {
+  margin-bottom: 20px;
+  font-size: 2rem;
+  font-weight: bold;
+}
