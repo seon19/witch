@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>관리자 페이지</title>
+
+<link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" type="text/css">
+</head>
+<body>
+
+<div class="main-container">
+	<div th:replace="~{/admin/menubar :: menubarFragment}"></div>
+
+	<div class="body-container">
+		<div class="title-container">
+			<span>재료 관리</span>
+		</div>
+		
+		<div class="table-container">
+			<form th:action="@{/admin/material/{mode}(mode=${mode})}" name="materialForm" method="post" enctype="multipart/form-data">
+				<table>
+					<tr>
+						<td>재료 이름</td>
+						<td>
+							<input type="text" name="materialName" th:value="${dto!=null ? dto.materialName : ''}">
+						</td>
+					</tr>
+					<tr>
+						<td>재료 설명</td>
+						<td>
+							<input type="text" name="materialDescription" th:value="${dto!=null ? materialDescription : ''}">
+						</td>
+					</tr>
+					<tr>
+						<td>재료 가격</td>
+						<td>
+							<input type="text" name="materialPrice" th:value="${dto!=null ? materialPrice : ''}">
+						</td>
+					</tr>
+					<tr>
+						<td>재료 레벨</td>
+						<td>
+							<input type="text" name="materialLevel" th:value="${dto!=null ? materialLevel : ''}">
+						</td>
+					</tr>
+					<tr>
+						<td>재료 효과</td>
+						<td>
+							<input type="text" name="materialEffect" th:value="${dto!=null ? materialEffect : ''}">
+						</td>
+					</tr>
+					<tr>
+						<td>재료 사진 파일</td>
+						<td>
+							<input type="file" name="selectFile" th:value="${dto!=null ? materialPhoto : ''}">
+						</td>
+					</tr>
+				</table>
+				
+				<table>
+					<tr>
+						<td>
+							<button type="button" onclick="sendOk();" th:text="${mode=='write'?'등록 완료':'수정 완료'}"></button>
+							<button type="reset">다시 입력</button>
+							<button type="button" th:text="${mode=='write'?'등록 취소':'수정 취소'}"></button>
+						
+							<th:block th:if="${mode=='update'}">
+								<input type="hidden" name="materialId" th:value="${dto.materialId}">
+								<input type="hidden" name="page" th:value="${page}">
+							</th:block>
+						</td>
+					</tr>
+				</table>
+			</form>
+		</div>		
+	</div>
+
+</div>
+
+<script type="text/javascript">
+function sendOk() {
+	const f = document.materialForm;
+	
+	let str = f.materialName.value;
+	if(!str) {
+		alert('재료 이름을 입력해주세요.');
+		f.materialName.focus();
+		return;
+	}
+	
+	str = f.materialDescription.value;
+	if(!str) {
+		alert('재료 설명을 입력해주세요.');
+		f.materialDescription.focus();
+		return;
+	}
+	
+	str = f.materialPrice.value;
+	if(!str) {
+		alert('재료 가격을 입력해주세요.');
+		f.materialPrice.focus();
+		return;
+	}
+	
+	str = f.materialLevel.value;
+	if(!str) {
+		alert('재료 레벨을 입력해주세요.');
+		f.materialLevel.focus();
+		return;
+	}
+	
+	str = f.materialEffect.value;
+	if(!str) {
+		alert('재료 효과를 입력해주세요.');
+		f.materialEffect.focus();
+		return;
+	}
+	
+	str = f.selectFile.value;
+	if(!str) {
+		alert('재료 사진을 업로드해주세요.');
+		f.selectFile.focus();
+		return;
+	}
+	
+	f.submit();
+}
+</script>
+
+</body>
+</html>

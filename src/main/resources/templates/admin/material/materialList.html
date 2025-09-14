@@ -15,7 +15,48 @@
 		<div class="title-container">
 			<span>재료 관리</span>
 		</div>
-	
+		
+		<div class="table-container">
+			<table>
+				<tr>
+					<td><span class="dataCount"></span></td>
+				</tr>
+			</table>
+			
+			<table>
+				<tr>
+					<td>
+						<button type="button" th:onclick="|location.href='@{/admin/material/write}'|">재료 추가</button>
+					</td>
+				</tr>
+			</table>
+			
+			<table>
+				<thead>
+					<tr>
+						<th>번호</th>
+						<th>재료</th>
+						<th>재료 이름</th>
+						<th>재료 레벨</th>
+						<th>재료 가격</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="dto, status: ${list}">
+						<td th:text="${dataCount-(page-1)*size-status.index}"></td>
+						<td>
+							<img th:src="@{/uploads/material/{imageName}(imageName=${dto.materialPhoto})}" width="80" height="80" style="object-fit: cover;">
+						</td>
+						<td th:text="${dto.materialName}">
+						<td th:text="${dto.materialLevel}">
+						<td th:text="${dto.materialPrice}">
+					</tr>
+					<tr th:if="${#lists.isEmpty(list)}">
+						<td>등록된 재료가 없습니다.</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 	</div>
 
 </div>
