@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+    
+    <nav class="sidebar" th:fragment="menubarFragment">
+        
+        <div class="sidebar-header">
+            <a th:href="@{/admin/main}" class="logo">관리자 페이지</a>
+        </div>
+
+        <ul class="nav-links">
+            <li>
+                <a th:href="@{/admin/users}">회원 관리</a>
+            </li>
+            <li>
+                <a th:href="@{/admin/material/materialList}">재료 관리</a>
+            </li>
+            <li class="has-submenu">
+                <a>상점 관리</a>
+                <ul class="submenu">
+                    <li><a th:href="@{/admin/orders/purchaseList}">구매 품목 관리</a></li>
+                    <li><a th:href="@{/admin/orders/saleList}">판매 품목 관리</a></li>
+                    <li><a th:href="@{/admin/orders/salesStatus}">판매 현황</a></li>
+                </ul>
+            </li>
+            <li>
+                <a th:href="@{/admin/crowList}">까마귀 배달부 관리</a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <span>○○○님</span>
+                <a th:href="@{/logout}" class="logout-button">로그아웃</a>
+            </div>
+        </div>
+    </nav>
+
+</body>
+</html>

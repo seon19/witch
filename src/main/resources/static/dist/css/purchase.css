@@ -5,3 +5,18 @@ body {
 	background-position: center center;
 	background-attachment: fixed;
 }
+
+.main-container {
+	display: flex;
+	justify-content: flex-end;
+	padding: 20px;
+}
+
+.button-container {
+	display: flex;
+	flex-direction: column;
+	gap: 82px;
+	padding: 20px;
+	margin-top: 40px;
+	margin-left: 30px;
+}
