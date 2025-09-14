@@ -19,14 +19,14 @@ public class OrderController {
 	private final OrderService service;
 	private final MyUtil myUtil;
 	
-	@GetMapping("list")
-	public String list() throws Exception {
+	@GetMapping("purchaseList")
+	public String purchaseList() throws Exception {
 		
 		try {
 			
 			
 		} catch (Exception e) {
-			log.info("list: ", e);
+			log.info("purchaseList: ", e);
 		}
 		
 		return "orders/purchaseList";

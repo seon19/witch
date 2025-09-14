@@ -4,14 +4,15 @@
 <meta charset="UTF-8">
 <title>상점</title>
 
-<link rel="stylesheet" th:href="@{/dist/css/orders.css}" type="text/css">
+<link rel="stylesheet" th:href="@{/dist/css/all.css}" type="text/css">
+<link rel="stylesheet" th:href="@{/dist/css/purchase.css}" type="text/css">
 </head>
 <body>
 
-<div>
+<div class="main-container">
 
 
-	<div>
+	<div class="page-container">
 		<button th:onclick="|location.href='@{/orders/purchaseList}'|">구매</button>
 		<button th:onclick="|location.href='@{/orders/saleList}'|">판매</button>
 	</div>
