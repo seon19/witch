@@ -26,8 +26,8 @@
 
         <div class="sidebar-footer">
             <div class="user-profile">
-                <span>○○○님</span>
-                <a th:href="@{/logout}" class="logout-button">로그아웃</a>
+                <span th:text="${loginUser.id}"></span>님
+                <a th:href="@{/member/login}">로그아웃</a>
             </div>
         </div>
     </nav>
