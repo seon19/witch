@@ -18,11 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 public class AdminHomeController {
 	
 	@GetMapping("main")
-	public String list(HttpSession session, Model model) {
+	public String list(HttpSession session, Model model) throws Exception {
 	    try {
 	        Member loginUser = (Member) session.getAttribute("loginUser");
-	        model.addAttribute("loginUser", loginUser);
-	        
+	        model.addAttribute("loginUser", loginUser);     
 	    } catch (Exception e) {
 	        log.error("list error: ", e);
 	    }
