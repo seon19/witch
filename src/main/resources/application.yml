@@ -1,4 +1,7 @@
 server:
+  error: 
+    whitelabel: 
+      enabled: false
   port: 9090
 
 spring:
