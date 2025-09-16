@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.sp.app.entity.Member;
+import com.sp.app.entity.SessionInfo;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +20,9 @@ public class AdminHomeController {
 	
 	@GetMapping("main")
 	public String list(HttpSession session, Model model) throws Exception {
+		
 	    try {
-	        Member loginUser = (Member) session.getAttribute("loginUser");
+	    	SessionInfo loginUser = (SessionInfo) session.getAttribute("loginUser");
 	        model.addAttribute("loginUser", loginUser);     
 	    } catch (Exception e) {
 	        log.error("list error: ", e);

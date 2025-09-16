@@ -8,5 +8,5 @@ import com.sp.app.entity.Member;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 	
-    public Optional<Member> findByIdAndPassword(String id, String password);
+    public Optional<Member> findByUserIdAndPassword(String userId, String password);
 }

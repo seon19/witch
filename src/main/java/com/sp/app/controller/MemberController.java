@@ -11,7 +11,8 @@
 	import org.springframework.web.bind.annotation.RequestParam;
 	
 	import com.sp.app.entity.Member;
-	import com.sp.app.service.MemberService;
+import com.sp.app.entity.SessionInfo;
+import com.sp.app.service.MemberService;
 	
 	import jakarta.servlet.http.HttpSession;
 	import lombok.RequiredArgsConstructor;
@@ -48,8 +49,22 @@
 		        	model.addAttribute("msg", "아이디 또는 비밀번호가 일치하지 않습니다");
 		            return "member/login";
 		        }
-	
-		        session.setAttribute("loginUser", member);
+		        
+		        SessionInfo info = SessionInfo.builder()
+		        		.memberId(member.getMemberId())
+		        		.userId(member.getUserId())
+		        		.name(member.getName())
+		        		.nickname(member.getNickname())
+		        		.email(member.getEmail())
+		        		.currentLevel(member.getCurrentLevel())
+		        		.currentExp(member.getCurrentExp())
+		        		.currentBalance(member.getCurrentBalance())
+		        		.profilePhoto(member.getProfilePhoto())
+		        		.build();
+		        
+		        session.setMaxInactiveInterval(30 * 60);
+		        
+		        session.setAttribute("loginUser", info);
 	
 		        if (member.getRole() == 1) {
 		            return "redirect:/main/home";

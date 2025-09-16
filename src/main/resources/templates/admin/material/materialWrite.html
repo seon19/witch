@@ -62,7 +62,7 @@
 						<td>
 							<button type="button" onclick="sendOk();" th:text="${mode=='write'?'등록 완료':'수정 완료'}"></button>
 							<button type="reset">다시 입력</button>
-							<button type="button" th:text="${mode=='write'?'등록 취소':'수정 취소'}"></button>
+							<button type="button" th:onclick="|location.href='@{/admin/material/materialList}'|" th:text="${mode=='write'?'등록 취소':'수정 취소'}"></button>
 						
 							<th:block th:if="${mode=='update'}">
 								<input type="hidden" name="materialId" th:value="${dto.materialId}">

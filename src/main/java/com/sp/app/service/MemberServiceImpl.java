@@ -25,7 +25,7 @@ public class MemberServiceImpl implements MemberService {
         String userId = (String) map.get("userId");
         String password = (String) map.get("password");
 
-        Optional<Member> result = memberRepository.findByIdAndPassword(userId, password);
+        Optional<Member> result = memberRepository.findByUserIdAndPassword(userId, password);
         return result.orElse(null);
     }
 }
