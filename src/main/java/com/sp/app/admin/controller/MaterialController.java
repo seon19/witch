@@ -14,8 +14,10 @@ import org.springframework.web.multipart.MultipartFile;
 import com.sp.app.admin.service.MaterialService;
 import com.sp.app.common.MyUtil;
 import com.sp.app.entity.Material;
+import com.sp.app.entity.Member;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,10 +34,13 @@ public class MaterialController {
 	public String list(@RequestParam(name = "page", defaultValue = "1") int current_page,
 			@RequestParam(name = "schType", defaultValue = "all") String schType,
 			@RequestParam(name = "kwd", defaultValue = "") String kwd,
-			Model model) throws Exception {
+			Model model,
+			HttpSession session) throws Exception {
 		
 		try {
-			
+			Member loginUser = (Member) session.getAttribute("loginUser");
+	        model.addAttribute("loginUser", loginUser);    
+	        
 			kwd = myUtil.decodeUrl(kwd);
 			
 			int total_page = 0;
