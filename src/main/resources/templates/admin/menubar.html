@@ -22,11 +22,13 @@
             <li>
                 <a th:href="@{/admin/crowList}">까마귀 배달부 관리</a>
             </li>
+            <li>
+            	<a th:href="@{/admin/recipe/recipeList}">레시피 등록</a>
+            </li>
         </ul>
-
         <div class="sidebar-footer">
             <div class="user-profile">
-                <span th:text="${loginUser.name}"></span>님
+                <span th:text="${loginUser != null ? loginUser.name : 'Guest'}"></span>
                 <a th:href="@{/member/login}">로그아웃</a>
             </div>
         </div>
