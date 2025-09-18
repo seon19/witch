@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>관리자 페이지</title>
+<link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" type="text/css">
+<link rel="stylesheet" th:href="@{/dist/css/cssAdmin/postionWrite.css}" type="text/css">
+</head>
+<body>
+<div class="main-container">
+	<div th:replace="~{/admin/menubar :: menubarFragment}"></div>
+	
+	<div class="body-container">
+		<div class="title-container">
+			<span>포션 등록</span>
+		</div>
+		
+		<div class="body-main">
+			<form th:action="@{/admin/recipe/{mode}(mode=${mode})}" name="recipeForm" method="post">
+				<table class="table table-border table-form">
+					<tr> 
+						<td>포션 이름</td>
+						<td> 
+							<input type="text" name="potionName" maxlength="100" class="form-control" 
+								th:value="${dto!=null ? dto.potionName : ''}">
+						</td>
+					</tr>
+					
+					<tr> 
+						<td>포션 설명</td>
+						<td> 
+							<input type="text" name="potionDescription" maxlength="10" class="form-control" 
+								th:value="${dto?.potionDescription}">
+						</td>
+					</tr>
+					
+					<tr> 
+						<td>포션 레벨</td>
+						<td> 
+							<input type="text" name="potionLevel" maxlength="10" class="form-control" 
+								th:value="${dto?.potionLevel}">
+						</td>
+					</tr>
+					
+					<tr> 
+						<td>맛 설명</td>
+						<td> 
+							<input type="text" name="tasteDescription" maxlength="10" class="form-control" 
+								th:value="${dto?.tasteDescription}">
+						</td>
+					</tr>
+					
+					<tr> 
+						<td>재료 설명</td>
+						<td> 
+							<textarea name="materialComposition" class="form-control" th:text="${dto?.materialComposition}"></textarea>
+						</td>
+					</tr>
+
+					<tr> 
+						<td>제작시획득 수</td>
+						<td> 
+							<input type="text" name="quantity" maxlength="10" class="form-control" 
+								th:value="${dto?.quantity}">
+						</td>
+					</tr>
+					
+					<tr> 
+						<td>제작 시 경험치</td>
+						<td> 
+							<input type="text" name="exp" maxlength="10" class="form-control" 
+								th:value="${dto?.exp}">
+						</td>
+					</tr>
+					
+					<tr> 
+						<td>첫번째 재료</td>
+						<td> 
+							<input type="text" name="firstMaterialId" maxlength="10" class="form-control" 
+								th:value="${dto?.firstMaterialId}">
+						</td>
+					</tr>
+					
+					<tr> 
+						<td>두번째 재료</td>
+						<td> 
+							<input type="text" name="secondMaterialId" maxlength="10" class="form-control" 
+								th:value="${dto?.secondMaterialId}">
+						</td>
+					</tr>
+					
+					<tr> 
+						<td>포션 사진</td>
+						<td> 
+							<input type="file" name="potionPhoto" class="form-control" 
+								th:value="${dto?.potionPhoto}">
+						</td>
+					</tr>
+				</table>
+				<table class="table">
+				<tr> 
+					<td align="center">
+						<button type="button" class="btn-accent" onclick="sendOk();" th:text="${mode=='write'?'등록완료':'수정완료'}"></button>
+						<button type="reset" class="btn-default">다시입력</button>
+						<button type="button" class="btn-default" th:text="${mode=='write'?'등록취소':'수정취소'}"></button>
+						
+						<th:block th:if="${mode=='update'}">
+							<input type="hidden" name="num" th:value="${dto.num}">
+							<input type="hidden" name="page" th:value="${page}">
+						</th:block>
+						
+					</td>
+				</tr>
+			</table>
+			</form>
+		</div>
+	</div>
+</div>
+</body>
+</html>

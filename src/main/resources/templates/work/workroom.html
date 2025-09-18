@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>위치 크래프트</title>
+<link rel="stylesheet" th:href="@{/dist/css/all.css}" type="text/css">
+<link rel="stylesheet" th:href="@{/dist/css/workroom.css}" type="text/css">
+
+</head>
+<body>
+
+<div class="main-container">
+	<div class="title-container">
+		<span class="logo">위치 크래프트</span>
+		<button th:onclick="|location.href='@{/member/login}'|">로그아웃</button>
+	</div>
+	<!-- 
+	<div class="menu-container">
+		<span> MENU</span>
+		<button th:onclick="|location.href='@{}'|">공지사항</button>
+		<button th:onclick="|location.href='@{}'|">자유게시판</button>
+	</div>
+
+	<div class="button-container">
+		<button th:onclick="|location.href='@{/work/workroom}'|">공방</button>
+		<button class="spBtn2" th:onclick="|location.href='@{}'|">레시피북</button>
+		<button class="spBtn3" th:onclick="|location.href='@{/orders/purchaseList}'|">상점</button>
+		<button class="spBtn4" th:onclick="|location.href='@{}'|">의뢰받기</button>
+	</div>
+	 -->
+	<div class="tool-container">
+		<button type="button"><img src="/dist/images/솥1.png" alt=""></button>
+	</div>
+	
+</div>
+
+</body>
+</html>

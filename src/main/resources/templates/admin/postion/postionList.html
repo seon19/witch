@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>관리자 페이지</title>
+
+<link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" type="text/css">
+<link rel="stylesheet" th:href="@{/dist/css/cssAdmin/postionList.css}" type="text/css">
+</head>
+<body>
+<div class="main-container">
+	<div th:replace="~{/admin/menubar :: menubarFragment}"></div>
+
+	<div class="body-container">
+		<div class="title-container">
+			<span>포션 관리</span>
+		</div>
+		
+		
+		<div class="table-container">
+			<table>
+				<tr>
+					
+				</tr>
+			</table>
+			
+			<table>
+				<tr>
+					<td><span class="dataCount"></span></td>
+					<td>
+						<form name="searchForm" class="form-search">
+							<select name="schType">
+								<option value="name" th:selected="${schType} == 'name'">포션 이름</option>
+								<option value="reg_date" th:selected="${schType} == 'materialLevel'">재료 레벨</option>
+							</select>
+							<input type="text" name="kwd" th:value="${kwd}">
+							<button type="button" class="btn-default" onclick="searchList()">검색</button>
+							<button type="button" th:onclick="|location.href='@{/admin/postion/postionWrite}'|">포션 추가</button>
+						</form>
+					</td>
+
+				</tr>
+			</table>
+			
+			<table>
+				<thead>
+					<tr>
+						<th>번호</th>
+						<th>재료 이미지</th>
+						<th>재료 이름</th>
+						<th>재료 레벨</th>
+						<th>재료 가격</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="dto, status: ${list}">
+						<td th:text="${dataCount-(page-1)*size-status.index}"></td>
+						<td>
+							<img th:src="@{/uploads/postion/{imageName}(imageName=${dto.potionPhoto})}" width="80" height="80" style="object-fit: cover;">
+						</td>
+						<td>
+							<a th:href="@{/admin/postion/postionetail/{potionId}(potionId=${dto.potionId})}" th:text="${dto.potionName}"></a>
+						</td>
+						<td th:text="${dto.materialLevel}">
+						<td th:text="${dto.materialPrice}">
+					</tr>
+					<tr th:if="${#lists.isEmpty(list)}" class="empty-row">
+						<td>등록된 레시피가 없습니다.</td>
+					</tr>
+					
+				</tbody>
+			</table>
+			<button type="button" class="btn-default" th:onclick="|location.href='@{/admin/postion/postionList}'|">새로고침</button>
+			<div class="page-navigation"></div>
+		</div>
+	
+	</div>
+	
+
+</div>
+</body>
+</html>
