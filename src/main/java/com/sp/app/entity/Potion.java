@@ -32,7 +32,7 @@ public class Potion {
     @Column(name = "potionlevel")
     private Integer potionLevel;
 
-    @Column(name = "tastdescription", length = 500)
+    @Column(name = "tasteDescription", length = 500)
     private String tasteDescription;
 
     @Column(name = "materialcomposition", length = 500)

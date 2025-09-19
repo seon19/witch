@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>관리자 페이지</title>
+<link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" type="text/css">
+
+</head>
+<body>
+<div class="main-container">
+	<div th:replace="~{/admin/menubar :: menubarFragment}"></div>
+	<div class="body-container">
+		<div class="title-container">
+		    <h2>포션 관리</h2>
+		</div>
+	
+		<div class="body-main">
+		
+			<table class="table table-border table-article">
+				<thead>
+					<tr>
+						<td colspan="2" align="center" th:text="${dto.potionName}"></td>
+					</tr>
+				</thead>
+				
+				<tbody>	
+					<tr>
+						<td>
+						    <img th:src="@{/dist//uploads/potion/{imageName}(imageName=${dto.potionPhoto})}" width="80" height="80">
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2" valign="top" height="200">
+							[(${dto.potionDescription})]
+						</td>
+					</tr>
+					
+					<tr style="border-bottom: none;">
+						<td colspan="2" align="right" style="padding-top: 3px;">
+							From : [(${dto.potionLevel})]
+						</td>
+					</tr>
+				</tbody>
+				
+			</table>
+			
+			<table class="table">
+				<tr>
+					<td width="50%">
+						<button type="button" class="btn-default" th:onclick="|location.href='@{/admin/potion/update/{potionId}(potionId=${dto.potionId}, page=${page})}'|">수정</button>
+						<button type="button" class="btn-default" onclick="deleteOk();">삭제</button>
+					</td>
+					<td align="right">
+						<button type="button" class="btn-default" th:onclick="|location.href='@{/admin/potion/potionList(page=${page})}'|">리스트</button>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+function deleteOk() {
+	if(confirm('위 자료를 삭제 하시겠습니까 ?')) {
+		let potionId = '[[${dto.potionId}]]';
+		let page = '[[${page}]]';
+		let url = `/admin/potion/delete/${potionId}?page=${page}`;
+		location.href = url;
+	}
+}
+</script>
+
+</body>
+</html>

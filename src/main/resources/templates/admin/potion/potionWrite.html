@@ -16,7 +16,7 @@
 		</div>
 		
 		<div class="body-main">
-			<form th:action="@{/admin/recipe/{mode}(mode=${mode})}" name="recipeForm" method="post">
+			<form th:action="@{/admin/potion/{mode}(mode=${mode})}" name="potionForm" method="post" enctype="multipart/form-data">
 				<table class="table table-border table-form">
 					<tr> 
 						<td>포션 이름</td>
@@ -74,25 +74,37 @@
 					</tr>
 					
 					<tr> 
-						<td>첫번째 재료</td>
-						<td> 
-							<input type="text" name="firstMaterialId" maxlength="10" class="form-control" 
-								th:value="${dto?.firstMaterialId}">
-						</td>
+					    <td>첫번째 재료</td>
+					    <td>
+					        <select name="firstMaterial.materialId" class="form-control">
+					            <option value="">-- 재료 선택 --</option>
+					            <option th:each="mat : ${materialList}"
+					                    th:value="${mat.materialId}"
+					                    th:text="${mat.materialName}"
+					                    th:selected="${dto?.firstMaterial?.materialId == mat.materialId}">
+					            </option>
+					        </select>
+					    </td>
 					</tr>
 					
 					<tr> 
-						<td>두번째 재료</td>
-						<td> 
-							<input type="text" name="secondMaterialId" maxlength="10" class="form-control" 
-								th:value="${dto?.secondMaterialId}">
-						</td>
+					    <td>두번째 재료</td>
+					    <td>
+					        <select name="secondMaterial.materialId" class="form-control">
+					            <option value="">-- 재료 선택 --</option>
+					            <option th:each="mat : ${materialList}"
+					                    th:value="${mat.materialId}"
+					                    th:text="${mat.materialName}"
+					                    th:selected="${dto?.secondMaterial?.materialId == mat.materialId}">
+					            </option>
+					        </select>
+					    </td>
 					</tr>
 					
 					<tr> 
 						<td>포션 사진</td>
 						<td> 
-							<input type="file" name="potionPhoto" class="form-control" 
+							<input type="file" name="selectFile" class="form-control" 
 								th:value="${dto?.potionPhoto}">
 						</td>
 					</tr>
@@ -105,7 +117,7 @@
 						<button type="button" class="btn-default" th:text="${mode=='write'?'등록취소':'수정취소'}"></button>
 						
 						<th:block th:if="${mode=='update'}">
-							<input type="hidden" name="num" th:value="${dto.num}">
+							<input type="hidden" name="potionId" th:value="${dto.potionId}">
 							<input type="hidden" name="page" th:value="${page}">
 						</th:block>
 						
@@ -116,5 +128,29 @@
 		</div>
 	</div>
 </div>
+
+<script type="text/javascript">
+function sendOk() {
+	const f = document.potionForm;
+	
+	let str = f.potionName.value;
+	if(!str) {
+		alert('재료 이름을 입력해주세요.');
+		f.materialName.focus();
+		return;
+	}
+	
+
+	
+	str = f.selectFile.value;
+	if(!str) {
+		alert('재료 사진을 업로드해주세요.');
+		f.selectFile.focus();
+		return;
+	}
+	
+	f.submit();
+}
+</script>
 </body>
 </html>

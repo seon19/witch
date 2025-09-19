@@ -2,17 +2,22 @@ package com.sp.app.admin.controller;
 
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.sp.app.admin.service.MaterialService;
 import com.sp.app.admin.service.PotionService;
 import com.sp.app.common.MyUtil;
+import com.sp.app.entity.Material;
 import com.sp.app.entity.Potion;
 import com.sp.app.entity.SessionInfo;
 
@@ -24,12 +29,13 @@ import lombok.extern.slf4j.Slf4j;
 @Controller
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/admin/postion/*")
+@RequestMapping("/admin/potion/*")
 public class PotionController {
 	private final PotionService service;
+	private final MaterialService materialService;
 	private final MyUtil myUtil;
 	
-	@GetMapping("postionList")
+	@GetMapping("potionList")
 	public String list(@RequestParam(name = "page", defaultValue = "1") int current_page,
 			@RequestParam(name = "schType", defaultValue = "all") String schType,
 			@RequestParam(name = "kwd", defaultValue = "") String kwd,
@@ -46,21 +52,21 @@ public class PotionController {
 			long dataCount = 0;
 			List<Potion> list = null;
 			
-			Page<Potion> pagePostion = service.listPage(schType, kwd, current_page, size);
+			Page<Potion> pagePotion = service.listPage(schType, kwd, current_page, size);
 			
-			if(pagePostion.isEmpty()) {
+			if(pagePotion.isEmpty()) {
 				current_page = 0;
 			} else {
-				total_page = pagePostion.getTotalPages();
+				total_page = pagePotion.getTotalPages();
 				
 				if(current_page > total_page && total_page > 0) {
 					current_page = total_page;
-					pagePostion = service.listPage(schType, kwd, current_page, size);
+					pagePotion = service.listPage(schType, kwd, current_page, size);
 				}
 				
-				dataCount = pagePostion.getTotalElements();
+				dataCount = pagePotion.getTotalElements();
 				
-				list = pagePostion.getContent();
+				list = pagePotion.getContent();
 			}			
 			
 			model.addAttribute("loginUser", loginUser);  
@@ -69,28 +75,139 @@ public class PotionController {
 			model.addAttribute("dataCount", dataCount);
 			model.addAttribute("size", size);
 			model.addAttribute("total_page", total_page);
+			
 			model.addAttribute("schType", schType);
 			model.addAttribute("kwd", kwd);
 			
 		} catch (Exception e) {
 			log.info("materialList: ", e);
 		}
-		return "admin/postion/postionList";
+		return "admin/potion/potionList";
 	}
 	
-	@GetMapping("postionWrite")
+	@GetMapping("potionWrite")
 	public String writeForm(Model model) throws Exception{
 		model.addAttribute("mode", "write");
-		return "admin/postion/postionWrite";
+		
+		List<Material> materialList = materialService.listAll();
+		model.addAttribute("materialList", materialList);
+		
+		return "admin/potion/potionWrite";
 	}
 	
 	@PostMapping("write")
-	public String writeSubmit(Potion dto, HttpServletRequest req) throws Exception{
+	public String writeSubmit(Potion dto, HttpServletRequest req, @RequestParam("selectFile") MultipartFile selectFile) throws Exception{
 		try {
-			service.insertPotion(dto);
+			service.insertPotion(dto, selectFile);
 		} catch (Exception e) {
 			log.info("writeSubmit : " , e);
 		}		
-		return "redirect:/potion/postionList";
+		return "redirect:/admin/potion/potionList";
+
 	}
+	
+	@GetMapping("potionDetail/{potionId}")
+	public String potionDetail(@PathVariable("potionId") long potionId,
+			@RequestParam(name = "page") String page,
+			@RequestParam(name = "schType", defaultValue = "all") String schType,
+			@RequestParam(name = "kwd", defaultValue = "") String kwd,
+			Model model) throws Exception {
+
+		String query = "page=" + page;
+		try {
+			kwd = myUtil.decodeUrl(kwd);
+			if (! kwd.isBlank()) {
+				query += "&schType=" + schType + "&kwd=" + myUtil.encodeUrl(kwd);
+			}
+
+			Potion dto = Objects.requireNonNull(service.findById(potionId));
+
+			// 엔터를 <br>로
+			dto.setTasteDescription(dto.getPotionDescription().replaceAll("\n", "<br>"));
+
+			// 이전 글, 다음 글
+			Potion prevDto = service.findByPrev(schType, kwd, potionId);
+			Potion nextDto = service.findByNext(schType, kwd, potionId);
+
+			model.addAttribute("dto", dto);
+			model.addAttribute("prevDto", prevDto);
+			model.addAttribute("nextDto", nextDto);
+
+			model.addAttribute("page", page);
+			model.addAttribute("query", query);
+			model.addAttribute("schType", schType);
+			model.addAttribute("kwd", kwd);
+
+			return "admin/potion/potionDetail";
+			
+		} catch (NullPointerException e) {
+			log.debug("potionDetail : ", e);
+		} catch (Exception e) {
+			log.info("potionDetail : ", e);
+		}
+		
+		return "redirect:/admin/potion/potionList?" + query;
+	}
+	
+	@GetMapping("update/{potionId}")
+	public String updateForm(@PathVariable("potionId") long potionId,
+			@RequestParam(name = "page") String page,
+			Model model) throws Exception {
+
+		try {
+			Potion dto = Objects.requireNonNull(service.findById(potionId));
+			
+			List<Material> materialList = materialService.listAll();
+			model.addAttribute("materialList", materialList);
+
+			model.addAttribute("mode", "update");
+			model.addAttribute("page", page);
+			model.addAttribute("dto", dto);
+
+			return "admin/potion/potionWrite";
+		} catch (NullPointerException e) {
+			log.debug("updateForm : ", e);
+		} catch (Exception e) {
+			log.info("updateForm : ", e);
+		}
+		
+		return "redirect:/admin/potion/potionList?page=" + page;
+	}
+
+	@PostMapping("update")
+	public String updateSubmit(Potion dto, 
+			@RequestParam(name = "page") String page,
+			@RequestParam("selectFile") MultipartFile selectFile) throws Exception {
+
+		// 수정 완료
+		try {
+			service.updatePotion(dto, selectFile);
+		} catch (Exception e) {
+		}
+
+		return "redirect:/admin/potion/potionList?page=" + page;
+	}
+	
+	@GetMapping("delete/{potionId}")
+	public String delete(@PathVariable("potionId") long potionId,
+	                     @RequestParam(name = "page", defaultValue = "1") String page,
+	                     @RequestParam(name = "schType", defaultValue = "all") String schType,
+	                     @RequestParam(name = "kwd", defaultValue = "") String kwd)
+	        throws Exception {
+
+	    String query = "page=" + page;
+	    try {
+	        kwd = myUtil.decodeUrl(kwd);
+	        if (!kwd.isBlank()) {
+	            query += "&schType=" + schType + "&kwd=" + myUtil.encodeUrl(kwd);
+	        }
+	        service.deletePotion(potionId);
+	    } catch (Exception e) {
+	        log.info("delete : ", e);
+	    }
+
+	    return "redirect:/admin/potion/potionList?" + query;
+	}
+	
+	
 }

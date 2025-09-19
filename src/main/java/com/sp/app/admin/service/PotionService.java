@@ -3,6 +3,7 @@ package com.sp.app.admin.service;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.sp.app.entity.Potion;
 
@@ -10,8 +11,8 @@ public interface PotionService {
 	public List<Potion> listAll();
 	public Page<Potion> listPage(String schType, String kwd, int current_page, int size);
 	
-	public void insertPotion(Potion entity) throws Exception;
-	public void updatePotion(Potion entity) throws Exception;
+	public void insertPotion(Potion entity, MultipartFile potionPhoto) throws Exception;
+	public void updatePotion(Potion entity, MultipartFile potionPhoto) throws Exception;
 	public void deletePotion(long potionId) throws Exception;
 	
 	public Potion findById(long potionId);
