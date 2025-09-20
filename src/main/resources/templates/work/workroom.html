@@ -14,25 +14,59 @@
 		<span class="logo">위치 크래프트</span>
 		<button th:onclick="|location.href='@{/member/login}'|">로그아웃</button>
 	</div>
-	<!-- 
-	<div class="menu-container">
-		<span> MENU</span>
-		<button th:onclick="|location.href='@{}'|">공지사항</button>
-		<button th:onclick="|location.href='@{}'|">자유게시판</button>
-	</div>
 
-	<div class="button-container">
-		<button th:onclick="|location.href='@{/work/workroom}'|">공방</button>
-		<button class="spBtn2" th:onclick="|location.href='@{}'|">레시피북</button>
-		<button class="spBtn3" th:onclick="|location.href='@{/orders/purchaseList}'|">상점</button>
-		<button class="spBtn4" th:onclick="|location.href='@{}'|">의뢰받기</button>
+	<div class="main-navigation">
+		<div class="menu-container">
+			<span> MENU</span>
+			<button th:onclick="|location.href='@{}'|">공지사항</button>
+			<button th:onclick="|location.href='@{}'|">자유게시판</button>
+		</div>
+	
+		<div class="button-container">
+			<button th:onclick="|location.href='@{/work/workroom}'|">공방</button>
+			<button class="spBtn2" th:onclick="|location.href='@{}'|">레시피북</button>
+			<button class="spBtn3" th:onclick="|location.href='@{/orders/purchaseList}'|">상점</button>
+			<button class="spBtn4" th:onclick="|location.href='@{}'|">의뢰받기</button>
+		</div>
 	</div>
-	 -->
+	
 	<div class="tool-container">
 		<button type="button"><img src="/dist/images/솥1.png" alt=""></button>
 	</div>
 	
+	<!-- 인벤토리 리스트 -->
+	<div class="inventory-container" id="inventoryArea">
+		
+	</div>
+	
+	<!-- 인벤토리 상세 -->
+	<div class="inventory-detail" id="inventoryDetail"></div>
+	
+	<div class="log-container">
+		<p>로그 상세 영역</p>
+	</div>
+	
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(function(){
+    loadInventory(1);
+});
+
+function loadInventory(page) {
+    $.ajax({
+        url: "/work/inventoryList",
+        type: "GET",
+        data: { page: page },
+        success: function(fragment) {
+            $("#inventoryArea").html(fragment); 
+        },
+        error: function() {
+            alert("인벤토리를 불러오는 데 실패했습니다.");
+        }
+    });
+}
+</script>
 </body>
 </html>

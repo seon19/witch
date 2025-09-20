@@ -101,6 +101,7 @@ body {
 	color: #1a1a1a;
 }
 
+/*제작 공간*/
 .tool-container {
     position: absolute;      
     top: 60%;             
@@ -121,5 +122,38 @@ body {
 }
 
 
+/*인벤토리 공간*/
+.inventory-container {
+  position: fixed;
+  top: 230px;
+  left: 338px;                 
+  width: 260px;      
+  height: 360px;        
+  background-color: #D9D9D9;     
+  padding: 20px 15px;
+  color: white;              
+}
+
+.inventory-detail {
+  position: fixed;
+  top: 650px;
+  left: 338px;                
+  width: 260px;      
+  height: 200px;        
+  background-color: #D9D9D9;      
+  padding: 20px 15px;
+  color: white;              
+}
+
+.log-container {
+  position: fixed;
+  top: 318px;
+  right: 250px;                
+  width: 260px;      
+  height: 320px;        
+  background-color: #D9D9D9;      
+  padding: 20px 15px;
+  color: white;              
+}
 
 

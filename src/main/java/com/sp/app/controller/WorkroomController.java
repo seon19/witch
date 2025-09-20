@@ -1,12 +1,20 @@
 package com.sp.app.controller;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.sp.app.common.MyUtil;
-import com.sp.app.service.WorkService;
+import com.sp.app.entity.Inventory;
+import com.sp.app.entity.SessionInfo;
+import com.sp.app.service.InventoryService;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,8 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequestMapping("/work/*")
 public class WorkroomController {
-	
-	private final WorkService service;
+	private final InventoryService inventoryserive;
 	private final MyUtil myUtil;
 
 	@GetMapping("workroom")
@@ -30,5 +37,55 @@ public class WorkroomController {
 		}
 		
 		return "work/workroom";
+	}
+	
+	@GetMapping("inventoryList")
+	public String list(@RequestParam(name = "page", defaultValue = "1") int current_page,
+			@RequestParam(name = "schType", defaultValue = "all") String schType,
+			@RequestParam(name = "kwd", defaultValue = "") String kwd,
+			Model model,
+			HttpSession session) throws Exception {
+		
+		try {
+			SessionInfo loginUser = (SessionInfo) session.getAttribute("loginUser");  
+	        
+			kwd = myUtil.decodeUrl(kwd);
+			
+			int total_page = 0;
+			int size = 10;
+			long dataCount = 0;
+			List<Inventory> list = null;
+			
+			Page<Inventory> pageInventory = inventoryserive.listPage(schType, kwd, current_page, size);
+			
+			if(pageInventory.isEmpty()) {
+				current_page = 0;
+			} else {
+				total_page = pageInventory.getTotalPages();
+				
+				if(current_page > total_page && total_page > 0) {
+					current_page = total_page;
+					pageInventory = inventoryserive.listPage(schType, kwd, current_page, size);
+				}
+				
+				dataCount = pageInventory.getTotalElements();
+				
+				list = pageInventory.getContent();
+			}			
+			
+			model.addAttribute("loginUser", loginUser);  
+			model.addAttribute("list", list);
+			model.addAttribute("page", current_page);
+			model.addAttribute("dataCount", dataCount);
+			model.addAttribute("size", size);
+			model.addAttribute("total_page", total_page);
+			
+			model.addAttribute("schType", schType);
+			model.addAttribute("kwd", kwd);
+			
+		} catch (Exception e) {
+			log.info("materialList: ", e);
+		}
+		return "work/inventory :: inventoryList";
 	}
 }

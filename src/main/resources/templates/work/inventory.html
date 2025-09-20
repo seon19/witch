@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<link rel="stylesheet" th:href="@{/dist/css/all.css}" type="text/css">
+<link rel="stylesheet" th:href="@{/dist/css/workroom.css}" type="text/css">
+<body>
+<div th:fragment="inventoryList">
+    <table>
+        <thead>
+            <tr>
+                <th>번호</th>
+                <th>이름</th>
+                <th>수량</th>
+                <th>구분</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="dto, status: ${list}">
+                <td th:text="${dataCount - (page-1)*size - status.index}"></td>
+
+                <td th:if="${dto.potion != null}" th:text="${dto.potion.potionName}"></td>
+
+                <td th:if="${dto.material != null}" th:text="${dto.material.materialName}"></td>
+
+                <td th:text="${dto.quantity}"></td>
+
+                <td th:text="${dto.potion != null ? '포션' : '재료'}"></td>
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(list)}" class="empty-row">
+                <td colspan="4">인벤토리가 비었습니다.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="page-navigation"></div>
+</div>
+</body>
+</html>

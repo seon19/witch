@@ -11,7 +11,7 @@ import com.sp.app.entity.Potion;
 
 public interface PotionRepository extends JpaRepository<Potion, Long> {
 	public Page<Potion> findByPotionNameContaining(String kwd, Pageable pageable);
-	Page<Potion> findByPotionLevel(int potionLevel, Pageable pageable);
+	public Page<Potion> findByPotionLevel(int potionLevel, Pageable pageable);
     @Query(value = "SELECT * FROM potion WHERE potionId > :potionId ORDER BY potionId ASC LIMIT 1", nativeQuery = true)
 	public Potion findByPrev(@Param("potionId") long potionId);
 	@Query(value = "SELECT * FROM potion WHERE potionId>:potionId AND potionName LIKE '%'||:kwd||'%' ORDER BY potionId ASC FETCH FIRST 1 ROWS ONLY", nativeQuery = true)
