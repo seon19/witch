@@ -5,7 +5,8 @@
 <title>관리자 페이지</title>
 
 <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" type="text/css">
-<link rel="stylesheet" th:href="@{/dist/css/cssAdmin/materialList.css}" type="text/css">
+<link rel="stylesheet" th:href="@{/dist/css/cssAdmin/materialDetail.css}" type="text/css">
+
 </head>
 <body>
 
@@ -13,14 +14,68 @@
 	<div th:replace="~{/admin/menubar :: menubarFragment}"></div>
 
 	<div class="body-container">
+	
 		<div class="title-container">
-			<span>재료 관리</span>
+			<span>재료 상세 정보</span>
 		</div>
-	
-	</div>
-	
+		
+		<div class="detail-card">
+			<div class="card-header">
+				<h2 th:text="${dto.materialName}">재료 이름</h2>
+			</div>
+		
+			<div class="card-body">
+				<div class="detail-image-wrapper">
+					<img th:src="@{/uploads/material/{imageName}(imageName=${dto.materialPhoto})}" alt="재료 이미지">
+				</div>
+				<div class="detail-info">
+					<div class="info-item">
+						<span class="info-label">효과</span>
+						<p class="info-value" th:text="${dto.materialEffect}"></p>
+					</div>
+					<div class="info-item">
+						<span class="info-label">설명</span>
+						<p class="info-value" th:text="${dto.materialDescription}"></p>
+					</div>
+					<div class="info-item-group">
+						<div class="info-item">
+							<span class="info-label">가격</span>
+							<p class="info-value" th:text="${#numbers.formatInteger(dto.materialPrice, 3, 'COMMA') + '원'}"></p>
+						</div>
+						<div class="info-item">
+							<span class="info-label">레벨</span>
+							<p class="info-value" th:text="${dto.materialLevel}"></p>
+						</div>
+					</div>
+				</div>
+			</div>
+		
+			<div class="card-footer">
+				<div>
+					<button type="button" class="btn btn-primary" th:onclick="|location.href='@{/admin/material/update/{materialId}(materialId=${dto.materialId}, page=${page})}'|">수정</button>
+					
+					<button type="button" class="btn btn-danger" th:onclick="deleteOk()">삭제</button>
+				</div>
+				<button type="button" class="btn btn-secondary" th:onclick="|location.href='@{/admin/material/materialList(page=${page})}'|">목록으로</button>
+			</div>
+		</div>
 
+		<form id="deleteForm" th:action="@{/admin/material/delete/{materialId}(materialId=${dto.materialId})}" method="post">
+			<input type="hidden" name="page" th:value="${page}">
+			<input type="hidden" name="schType" th:value="${schType}">
+			<input type="hidden" name="kwd" th:value="${kwd}">
+		</form>
+		
+	</div>
 </div>
+
+<script type="text/javascript">
+function deleteOk() {
+	if(confirm('재료를 삭제 하시겠습니까?')) {
+		document.getElementById('deleteForm').submit();
+	}
+}
+</script>
 
 </body>
 </html>

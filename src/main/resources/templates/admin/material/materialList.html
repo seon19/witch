@@ -13,48 +13,45 @@
 	<div th:replace="~{/admin/menubar :: menubarFragment}"></div>
 
 	<div class="body-container">
-		<div class="title-container">
-			<span>재료 관리</span>
-		</div>
-		
+
+		<header class="content-header">
+			<div class="header-top">
+				<div class="title-container">
+					<span>재료 관리</span>
+				</div>
+			</div>
+
+			<div class="header-bottom">
+				
+				<div>
+					<form name="searchForm" class="form-search">
+						<select name="schType">
+							<option value="name" th:selected="${schType} == 'name'">재료 이름</option>
+							<option value="reg_date" th:selected="${schType} == 'materialLevel'">재료 레벨</option>
+						</select>
+						<input type="text" name="kwd" th:value="${kwd}">
+						<button type="button" class="btn-default" onclick="searchList()">검색</button>
+					</form>
+				</div>
+				<div>
+					<button type="button" th:onclick="|location.href='@{/admin/material/write}'|">재료 추가</button>
+				</div>
+			</div>
+		</header>
+
+
 		<div>
-			<button type="button" class="btn-default" th:onclick="|location.href='@{/admin/material/materialList}'|">새로고침</button>
+			<span class="dataCount"></span>
 		</div>
-		
 		<div class="table-container">
-			<table>
-				<tr>
-					
-				</tr>
-			</table>
-			
-			<table>
-				<tr>
-					<td><span class="dataCount"></span></td>
-					<td>
-						<form name="searchForm" class="form-search">
-							<select name="schType">
-								<option value="name" th:selected="${schType} == 'name'">재료 이름</option>
-								<option value="reg_date" th:selected="${schType} == 'materialLevel'">재료 레벨</option>
-							</select>
-							<input type="text" name="kwd" th:value="${kwd}">
-							<button type="button" class="btn-default" onclick="searchList()">검색</button>
-						</form>
-					</td>
-					<td>
-						<button type="button" th:onclick="|location.href='@{/admin/material/write}'|">재료 추가</button>
-					</td>
-				</tr>
-			</table>
-			
 			<table>
 				<thead>
 					<tr>
 						<th>번호</th>
 						<th>재료 이미지</th>
 						<th>재료 이름</th>
-						<th>재료 레벨</th>
 						<th>재료 가격</th>
+						<th>재료 레벨</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -64,28 +61,35 @@
 							<img th:src="@{/uploads/material/{imageName}(imageName=${dto.materialPhoto})}" width="80" height="80" style="object-fit: cover;">
 						</td>
 						<td>
-							<a th:href="@{/admin/material/materialDetail/{materialId}(materialId=${dto.materialId})}" th:text="${dto.materialName}"></a>
+						    <a th:href="@{/admin/material/materialDetail/{materialId}(materialId=${dto.materialId}, page=${page}, schType=${schType}, kwd=${kwd})}" th:text="${dto.materialName}"></a>
 						</td>
-						<td th:text="${dto.materialLevel}">
-						<td th:text="${dto.materialPrice}">
+						<td th:text="${dto.materialPrice}"></td>
+						<td th:text="${dto.materialLevel}"></td>
 					</tr>
 					<tr th:if="${#lists.isEmpty(list)}" class="empty-row">
-						<td>등록된 재료가 없습니다.</td>
+						<td colspan="5">등록된 재료가 없습니다.</td>
 					</tr>
 				</tbody>
 			</table>
 			
-			<div class="page-navigation"></div>
+			<div class="table-footer">
+				<div class="page-navigation"></div>
+						
+				<div>
+					<button type="button" class="btn btn-outline" th:onclick="|location.href='@{/admin/material/materialList}'|">새로고침</button>
+				</div>
+			</div>
 		</div>
 	</div>
 
 </div>
 
+<script type="text/javascript" th:src="@{/dist/js/paging.js}"></script>
 <script type="text/javascript">
 window.addEventListener('DOMContentLoaded', function() {
 	let page = '[[${page}]]';
 	let pageSize = '[[${size}]]';
-	let dataCount = parseInt('[[${dataCount}]]');
+	let dataCount = parseInt('[[${dataCount}]]') || 0;
 	let url = '[[@{/admin/material/materialList}]]';
 	let search = '[[${not #strings.isEmpty(kwd)}]]';
 	
@@ -97,7 +101,7 @@ window.addEventListener('DOMContentLoaded', function() {
 	let paging = pagingUrl(page, total_page, url);
 	
 	document.querySelector('.dataCount').innerHTML = `${dataCount}개 (${page}/${total_page} 페이지)`;
-	document.querySelector('.page-navigation').innerHTML = dataCount === 0 ? '등록된 게시물이 없습니다.' : paging
+	document.querySelector('.page-navigation').innerHTML = dataCount === 0 ? '' : paging
 });
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -117,17 +121,8 @@ function searchList() {
 		return;
 	}
 	
-	// form 요소는 FormData를 이용하여 URLSearchParams 으로 변환
 	const formData = new FormData(f);
 	let params = new URLSearchParams(formData).toString();
-	
-	/*
-	let objParams = {
-		schType:f.schType.value, kwd:f.kwd.value
-	};
-	// 자바스트립트 객체를 queryString(이름1=값1&이름2=값2)로 변환
-	const params = new URLSearchParams(objParams).toString();
-	*/
 	
 	let url = '[[@{/admin/material/materialList}]]';
 	location.href = url + '?' + params;

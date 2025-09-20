@@ -1,9 +1,9 @@
 package com.sp.app.admin.service;
 
 import java.io.File;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.sp.app.common.FileManager;
 import com.sp.app.entity.Material;
 import com.sp.app.repository.MaterialRepository;
 
@@ -25,15 +26,16 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class MaterialServiceImpl implements MaterialService {
-	
+
 	private final MaterialRepository materialRepository;
+	private final FileManager fileManager;
 	
 	@Value("${file.upload-path.root}")
 	private String uploadPathRoot;
 	
 	@Value("${file.upload-path.material}")
     private String materialSubPath;
-	
+
 	@Override
 	public List<Material> listAll() {
 		List<Material> list = materialRepository.findAll();
@@ -59,32 +61,23 @@ public class MaterialServiceImpl implements MaterialService {
 		return p;
 	}
 
+	@Transactional
 	@Override
 	public void insertMaterial(Material entity, MultipartFile materialPhoto) throws Exception {
-
+		
+		// 최종 저장 경로
+		String fullPath = uploadPathRoot + File.separator + materialSubPath;
+		
 		try {
 			if(materialPhoto != null && ! materialPhoto.isEmpty()) {
 				
-				// 최종 저장 경로
-				String fullPath = uploadPathRoot + File.separator + materialSubPath;
+				String extension = materialPhoto.getOriginalFilename().substring(materialPhoto.getOriginalFilename().lastIndexOf("."));
+				String savedFilename = fileManager.generateUniqueFileName(fullPath, extension);
 				
-				// 폴더 없으면 폴더 만들기
-				File f = new File(fullPath);
-				if(!f.exists()) {
-					f.mkdirs();
-				}
+				File dest = new File(fullPath, savedFilename);
+				materialPhoto.transferTo(dest);
 				
-				String originalFilename = materialPhoto.getOriginalFilename();
-				
-				String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-				
-				String saveFilename = timestamp +  "_" + originalFilename;
-				
-				String pathname = fullPath + File.separator + saveFilename;
-				File f2 = new File(pathname);
-				materialPhoto.transferTo(f2);
-				
-				entity.setMaterialPhoto(saveFilename);	
+				entity.setMaterialPhoto(savedFilename);	
 			}
 			
 			materialRepository.save(entity);
@@ -95,22 +88,52 @@ public class MaterialServiceImpl implements MaterialService {
 		}
 	}
 
+	@Transactional
 	@Override
 	public void updateMaterial(Material entity) throws Exception {
-		// TODO Auto-generated method stub
-		
+		try {
+			materialRepository.save(entity);
+		} catch (Exception e) {
+			log.info("updateMaterial: ", e);
+			throw e;
+		}
 	}
 	
+	@Transactional
 	@Override
 	public void deleteMaterial(long materialid) throws Exception {
-		// TODO Auto-generated method stub
-		
+		try {
+			Material dto = findById(materialid);
+			if(dto == null) {
+				return;
+			}
+			
+			String fullPath = uploadPathRoot + File.separator + materialSubPath;
+			if(dto.getMaterialPhoto() != null) {
+				fileManager.deletePath(fullPath + File.separator + dto.getMaterialPhoto());
+			}
+			
+			materialRepository.deleteById(materialid);
+		} catch (Exception e) {
+			log.info("deleteMaterial: ", e);
+			throw e;
+		}
 	}
 
 	@Override
 	public Material findById(long materialid) {
-		// TODO Auto-generated method stub
-		return null;
+		Material dto = null;
+		
+		try {
+			Optional<Material> material = materialRepository.findById(materialid);
+			dto  = material.get();
+			
+		} catch (NoSuchElementException  e) {
+		} catch (Exception e) {
+			log.info("findById", e);
+		}
+		
+		return dto;
 	}
 
 	
