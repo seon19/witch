@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>관리자 페이지 - 상점 상품 등록</title>
+
+<link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" type="text/css">
+<link rel="stylesheet" th:href="@{/dist/css/cssAdmin/materialWrite.css}" type="text/css">
+
+</head>
+<body>
+
+<div class="main-container">
+	<div th:replace="~{/admin/menubar :: menubarFragment}"></div>
+
+	<div class="body-container">
+		<div class="title-container">
+			<span th:text="${mode=='saleWrite'?'상점 상품 등록':'상점 상품 수정'}"></span>
+		</div>
+		
+		<div class="table-container">
+			<form th:action="@{/admin/orders/{mode}(mode=${mode})}" name="shopForm" method="post">
+				<table>
+					<tr>
+						<td>재료 선택</td>
+						<td>
+							<select name="materialId" id="materialSelect">
+								<option value="">--- 재료를 선택하세요 ---</option>
+								<th:block th:each="m : ${materialList}">
+									<option th:value="${m.materialId}" 
+											th:text="${m.materialName}" 
+											th:selected="${dto != null and dto.material.materialId == m.materialId}"
+											th:disabled="${registeredMaterialIds != null and registeredMaterialIds.contains(m.materialId)}"></option>
+								</th:block>
+							</select>
+						</td>
+					</tr>
+				</table>
+
+				<div id="material-info-area" th:style="${mode=='update' ? 'display:block;' : 'display:none;'}">
+					<h3 style="padding: 1rem 1rem 0;">선택된 재료 정보</h3>
+					<table>
+						<tr>
+							<td>미리보기 이미지</td>
+							<td><img id="preview-image" th:src="${dto != null ? '/uploads/material/' + dto.material.materialPhoto : ''}" style="max-width: 150px; border-radius: 5px; margin-top: 8px;"></td>
+						</tr>
+						<tr>
+							<td>재료 설명</td>
+							<td id="preview-description" th:text="${dto?.material.materialDescription}"></td>
+						</tr>
+						<tr>
+							<td>재료 효과</td>
+							<td id="preview-effect" th:text="${dto?.material.materialEffect}"></td>
+						</tr>
+						<tr>
+							<td>재료 레벨</td>
+							<td id="preview-level" th:text="${dto?.material.materialLevel}"></td>
+						</tr>
+						<tr>
+							<td>기존 가격</td>
+							<td id="preview-price" th:text="${dto != null ? #numbers.formatInteger(dto.material.materialPrice, 3, 'COMMA') + '원' : ''}"></td>
+						</tr>
+					</table>
+				</div>
+
+				<h3 style="padding: 1rem 1rem 0;">판매 정보 입력</h3>
+				<table>
+					 <tr>
+						<td>판매 가격</td>
+						<td><input type="text" name="sellingPrice" placeholder="판매 가격을 숫자로 입력하세요." class="form-control"
+								   th:value="${dto?.sellingPrice}"></td>
+					</tr>
+					<tr>
+						<td>판매 여부</td>
+						<td>
+							<label><input type="radio" name="isAvailable" value="true" th:checked="${dto == null or dto.isAvailable}"> 판매</label>
+							<label style="margin-left: 10px;"><input type="radio" name="isAvailable" value="false" th:checked="${dto != null and !dto.isAvailable}"> 판매 중지</label>
+						</td>
+					</tr>
+				</table>
+				
+				<th:block th:if="${mode=='update'}">
+					<input type="hidden" name="shopId" th:value="${dto.shopId}">
+					<input type="hidden" name="page" th:value="${page}">
+				</th:block>
+
+				<div class="form-buttons">
+				    <button type="button" class="btn btn-primary" onclick="sendOk();" th:text="${mode=='saleWrite'?'등록 완료':'수정 완료'}"></button>
+				    <button type="button" class="btn btn-secondary" th:onclick="|location.href='@{/admin/orders/saleList}'|" th:text="${mode=='saleWrite'?'등록 취소':'수정 취소'}"></button>
+				</div>
+			</form>
+		</div>		
+	</div>
+</div>
+
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+	const materialSelect = document.getElementById('materialSelect');
+	const infoArea = document.getElementById('material-info-area');
+
+	materialSelect.addEventListener('change', function(e) {
+		const materialId = e.target.value;
+
+		if (!materialId) {
+			infoArea.style.display = 'none';
+			return;
+		}
+
+		// API 호출
+		
+		/*
+		    fetch: Javascript에 내장된 서버와 통신을 할 수 있게 해주는 최신 함수
+		    then: 성공 시
+		    catch: 실패 시
+		*/
+		fetch(`/admin/orders/api/material/${materialId}`)
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('Network response was not ok');
+				}
+				return response.json();
+			})
+			.then(data => {
+				document.getElementById('preview-image').src = `/uploads/material/${data.materialPhoto}`;
+				document.getElementById('preview-description').textContent = data.materialDescription;
+				document.getElementById('preview-effect').textContent = data.materialEffect;
+				document.getElementById('preview-level').textContent = data.materialLevel;
+				document.getElementById('preview-price').textContent = data.materialPrice.toLocaleString() + '원';
+				
+				infoArea.style.display = 'block';
+			})
+			.catch(error => {
+				console.error('Error fetching material data:', error);
+				infoArea.style.display = 'none';
+			});
+	});
+});
+
+function sendOk() {
+    const f = document.shopForm;
+
+    const materialId = f.materialId.value;
+    if (!materialId) {
+        alert('판매할 재료를 선택해주세요.');
+        f.materialId.focus();
+        return;
+    }
+    
+    const sellingPrice = f.sellingPrice.value.trim();
+    if (!sellingPrice) {
+        alert('판매 가격을 입력해주세요.');
+        f.sellingPrice.focus();
+        return;
+    }
+
+    const priceRegex = /^[0-9]+$/;
+    if (!priceRegex.test(sellingPrice)) {
+        alert('판매 가격은 숫자만 입력할 수 있습니다.');
+        f.sellingPrice.focus();
+        return;
+    }
+
+    f.submit();
+}
+</script>
+
+</body>
+</html>
