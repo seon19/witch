@@ -2,8 +2,6 @@ package com.sp.app.admin.service;
 
 
 import java.io.File;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -17,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.sp.app.common.FileManager;
 import com.sp.app.entity.Potion;
 import com.sp.app.repository.PotionRepository;
 
@@ -29,11 +28,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PotionServiceImpl implements PotionService {
 	private final PotionRepository potionRepository;
+	private final FileManager fileManager;
 	
 	@Value("${file.upload-path.root}")
 	private String uploadPathRoot;
 	
-	@Value("${file.upload-path.material}")
+	@Value("${file.upload-path.potion}")
     private String potionSubPath;
 	
 	@Override
@@ -67,59 +67,97 @@ public class PotionServiceImpl implements PotionService {
 		}
 		return potion;
 	}
-
+	
+	@Transactional
 	@Override
 	public void insertPotion(Potion entity, MultipartFile potionPhoto) throws Exception {
-		try {
-			if(potionPhoto != null && ! potionPhoto.isEmpty()) {
-				String fullPath = System.getProperty("user.dir") + "/src/main/resources/static/dist//uploads/potion";
-				
-				File f = new File(fullPath);
-				if(!f.exists()) {
-					f.mkdirs();
-				}
-				
-				String originalFilename = potionPhoto.getOriginalFilename();
-				
-				String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-				
-				String saveFilename = timestamp +  "_" + originalFilename;
-				
-				String pathname = fullPath + "/" + saveFilename;
-				File f2 = new File(pathname);
-				potionPhoto.transferTo(f2);
-				
-				entity.setPotionPhoto(saveFilename);	
-			}
-			potionRepository.save(entity);
-		} catch (Exception e) {
-			log.info("insertPotion : ", e);
-			throw e;
-		}
-		
+	    String fullPath = uploadPathRoot + File.separator + potionSubPath;
+	    
+	    try {
+	        File dir = new File(fullPath);
+	        if (!dir.exists()) {
+	            dir.mkdirs();
+	        }
+
+	        if (potionPhoto != null && !potionPhoto.isEmpty()) {
+	            String extension = potionPhoto.getOriginalFilename()
+	                    .substring(potionPhoto.getOriginalFilename().lastIndexOf("."));
+	            String savedFilename = fileManager.generateUniqueFileName(fullPath, extension);
+
+	            File dest = new File(fullPath, savedFilename);
+	            potionPhoto.transferTo(dest);
+
+	            entity.setPotionPhoto(savedFilename);
+	        }
+
+	        potionRepository.save(entity);
+	    } catch (Exception e) {
+	        log.info("insertPotion : ", e);
+	        throw e;
+	    }
 	}
 
-	@Override
 	@Transactional
+	@Override
 	public void updatePotion(Potion entity, MultipartFile potionPhoto) throws Exception {
-		try {
-			potionRepository.save(entity);
-		} catch (Exception e) {
-			log.info("updatePotion : ", e);
-			throw e;
-		}
-		
+	    String fullPath = uploadPathRoot + File.separator + potionSubPath;
+
+	    try {
+	        File dir = new File(fullPath);
+	        if (!dir.exists()) {
+	            dir.mkdirs();
+	        }
+
+	        if (potionPhoto != null && !potionPhoto.isEmpty()) {
+	            if (entity.getPotionPhoto() != null) {
+	                File oldFile = new File(fullPath, entity.getPotionPhoto());
+	                if (oldFile.exists()) {
+	                    oldFile.delete();
+	                }
+	            }
+
+	            String extension = potionPhoto.getOriginalFilename()
+	                    .substring(potionPhoto.getOriginalFilename().lastIndexOf("."));
+	            String savedFilename = fileManager.generateUniqueFileName(fullPath, extension);
+
+	            File dest = new File(fullPath, savedFilename);
+	            potionPhoto.transferTo(dest);
+
+	            entity.setPotionPhoto(savedFilename);
+	        }
+
+	        potionRepository.save(entity);
+	    } catch (Exception e) {
+	        log.info("updatePotion : ", e);
+	        throw e;
+	    }
 	}
 
 	@Override
 	@Transactional
 	public void deletePotion(long potionId) throws Exception {
-		try {
-			potionRepository.deleteById(potionId);
-		} catch (Exception e) {
-			log.info("deletePotion : ", e);
-		}
-		
+	    try {
+	        Potion dto = findById(potionId);
+
+	        if (dto == null) {
+	            return; 
+	        }
+
+	        String fullPath = uploadPathRoot + File.separator + potionSubPath;
+
+	        if (dto.getPotionPhoto() != null && !dto.getPotionPhoto().isEmpty()) {
+	            File file = new File(fullPath, dto.getPotionPhoto());
+	            if (file.exists()) {
+	                file.delete();
+	            }
+	        }
+
+	        potionRepository.deleteById(potionId);
+
+	    } catch (Exception e) {
+	        log.info("deletePotion : ", e);
+	        throw e;
+	    }
 	}
 
 	@Override

@@ -35,8 +35,11 @@ public class Potion {
     @Column(name = "tasteDescription", length = 500)
     private String tasteDescription;
 
-    @Column(name = "materialcomposition", length = 500)
-    private String materialComposition;
+    @Column(name = "potionComposition", length = 500)
+    private String potionComposition;
+    
+    @Column(name = "potionMemo", length = 500)
+    private String potionMemo;
     
     @Column(name = "potionphoto", length = 255)
     private String potionPhoto;

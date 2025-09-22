@@ -8,39 +8,41 @@
 <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/potionList.css}" type="text/css">
 </head>
 <body>
+
 <div class="main-container">
 	<div th:replace="~{/admin/menubar :: menubarFragment}"></div>
 
 	<div class="body-container">
-		<div class="title-container">
-			<span>포션 관리</span>
+
+		<header class="content-header">
+			<div class="header-top">
+				<div class="title-container">
+					<span>포션 관리</span>
+				</div>
+			</div>
+
+			<div class="header-bottom">
+				<div>
+					<form name="searchForm" class="form-search">
+						<select name="schType">
+							<option value="potionName" th:selected="${schType}=='potionName'">포션 이름</option>
+							<option value="potionLevel" th:selected="${schType}=='potionLevel'">포션 레벨</option>
+						</select>
+						<input type="text" name="kwd" th:value="${kwd}">
+						<button type="button" class="btn-default" onclick="searchList()">검색</button>
+					</form>
+				</div>
+				<div>
+					<button type="button" th:onclick="|location.href='@{/admin/potion/potionWrite}'|">포션 추가</button>
+				</div>
+			</div>
+		</header>
+
+		<div>
+			<span class="dataCount"></span>
 		</div>
-		
-		
+
 		<div class="table-container">
-			<table>
-				<tr>
-					<td width="50%"><span class="dataCount"></span></td>
-					<td align="right">&nbsp;</td>
-				</tr>
-			</table>
-			<table>
-				<tr>
-					<td><span class="dataCount"></span></td>
-					<td>
-						<form name="searchForm" class="form-search">
-							<select name="schType">
-								<option value="potionName" th:selected="${schType}=='potionName'">포션 이름</option>
-								<option value="potionLevel" th:selected="${schType}=='potionLevel'">포션 레벨</option>
-							</select>
-							<input type="text" name="kwd" th:value="${kwd}">
-							<button type="button" class="btn-default" onclick="searchList()">검색</button>
-							<button type="button" th:onclick="|location.href='@{/admin/potion/potionWrite}'|">포션 추가</button>
-						</form>
-					</td>
-				</tr>
-			</table>
-			
 			<table>
 				<thead>
 					<tr>
@@ -56,31 +58,44 @@
 					<tr th:each="dto, status: ${list}">
 						<td th:text="${dataCount-(page-1)*size-status.index}"></td>
 						<td>
-						    <img th:src="@{/dist//uploads/potion/{imageName}(imageName=${dto.potionPhoto})}" width="80" height="80">
+							<img th:src="@{/uploads/potion/{imageName}(imageName=${dto.potionPhoto})}" width="80" height="80" style="object-fit: cover;">
 						</td>
 						<td>
-							<a th:href="@{/admin/potion/potionDetail/{potionId}(potionId=${dto.potionId}, page=${page})}" th:text="${dto.potionName}"></a>
+							<a th:href="@{/admin/potion/potionDetail/{potionId}(
+							    potionId=${dto.potionId},
+							    page=${page != null ? page : 1},
+							    schType=${schType != null ? schType : 'all'},
+							    kwd=${kwd != null ? kwd : ''})}" 
+							   th:text="${dto.potionName}"></a>
 						</td>
-						<td th:text="${dto.potionLevel}"></td>
-						<td th:text="${dto.quantity}"></td>
-						<td th:text="${dto.exp}"></td>
+						<td th:text="${'Lv. ' + dto.potionLevel}"></td>
+						<td th:text="${dto.quantity + '개'}"></td>
+						<td th:text="${dto.exp + 'EXP'}"></td>
 					</tr>
 					<tr th:if="${#lists.isEmpty(list)}" class="empty-row">
-						<td>등록된 레시피가 없습니다.</td>
+						<td colspan="6">등록된 포션이 없습니다.</td>
 					</tr>
 				</tbody>
 			</table>
-			<button type="button" class="btn-default" th:onclick="|location.href='@{/admin/potion/potionList}'|">새로고침</button>
-			<div class="page-navigation"></div>
+
+			<div class="table-footer">
+				<div class="page-navigation-container">
+					<div class="page-navigation"></div>
+				</div>
+				<div class="btn-refresh-container">
+					<button type="button" class="btn btn-outline" th:onclick="|location.href='@{/admin/potion/potionList}'|">새로고침</button>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
+
 <script type="text/javascript" th:src="@{/dist/js/paging.js}"></script>
 <script type="text/javascript">
 window.addEventListener('DOMContentLoaded', function() {
 	let page = '[[${page}]]';
 	let pageSize = '[[${size}]]';
-	let dataCount = parseInt('[[${dataCount}]]');
+	let dataCount = parseInt('[[${dataCount}]]') || 0;
 	let url = '[[@{/admin/potion/potionList}]]';
 	let search = '[[${not #strings.isEmpty(kwd)}]]';
 	
@@ -92,7 +107,7 @@ window.addEventListener('DOMContentLoaded', function() {
 	let paging = pagingUrl(page, total_page, url);
 	
 	document.querySelector('.dataCount').innerHTML = `${dataCount}개 (${page}/${total_page} 페이지)`;
-	document.querySelector('.page-navigation').innerHTML = dataCount === 0 ? '등록된 게시물이 없습니다.' : paging
+	document.querySelector('.page-navigation').innerHTML = dataCount === 0 ? '' : paging
 });
 
 window.addEventListener('DOMContentLoaded', () => {	
@@ -100,7 +115,6 @@ window.addEventListener('DOMContentLoaded', () => {
 	inputEL.addEventListener('keydown', function (evt) {
 	    if(evt.key === 'Enter') {
 	    	evt.preventDefault();
-	    	
 	    	searchList();
 	    }
 	});
@@ -118,7 +132,6 @@ function searchList() {
 	let url = '[[@{/admin/potion/potionList}]]';
 	location.href = url + '?' + params;
 }
-
 </script>
 </body>
 </html>

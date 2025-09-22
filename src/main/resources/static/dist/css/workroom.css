@@ -121,6 +121,25 @@ body {
     height: auto;
 }
 
+/*제작 버튼*/
+.create-container {
+    position: absolute;      
+    top: 570px;             
+    right: 450px;            
+}
+
+.create-container button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.create-container img {
+    width: 600px;  
+    height: auto;
+}
+
 
 /*인벤토리 공간*/
 .inventory-container {

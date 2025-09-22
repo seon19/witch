@@ -3,68 +3,91 @@
 <head>
 <meta charset="UTF-8">
 <title>관리자 페이지</title>
+
 <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" type="text/css">
+<link rel="stylesheet" th:href="@{/dist/css/cssAdmin/potionDetail.css}" type="text/css">
 
 </head>
 <body>
+
 <div class="main-container">
 	<div th:replace="~{/admin/menubar :: menubarFragment}"></div>
+
 	<div class="body-container">
-		<div class="title-container">
-		    <h2>포션 관리</h2>
-		</div>
 	
-		<div class="body-main">
-		
-			<table class="table table-border table-article">
-				<thead>
-					<tr>
-						<td colspan="2" align="center" th:text="${dto.potionName}"></td>
-					</tr>
-				</thead>
-				
-				<tbody>	
-					<tr>
-						<td>
-						    <img th:src="@{/dist//uploads/potion/{imageName}(imageName=${dto.potionPhoto})}" width="80" height="80">
-						</td>
-					</tr>
-					<tr>
-						<td colspan="2" valign="top" height="200">
-							[(${dto.potionDescription})]
-						</td>
-					</tr>
-					
-					<tr style="border-bottom: none;">
-						<td colspan="2" align="right" style="padding-top: 3px;">
-							From : [(${dto.potionLevel})]
-						</td>
-					</tr>
-				</tbody>
-				
-			</table>
-			
-			<table class="table">
-				<tr>
-					<td width="50%">
-						<button type="button" class="btn-default" th:onclick="|location.href='@{/admin/potion/update/{potionId}(potionId=${dto.potionId}, page=${page})}'|">수정</button>
-						<button type="button" class="btn-default" onclick="deleteOk();">삭제</button>
-					</td>
-					<td align="right">
-						<button type="button" class="btn-default" th:onclick="|location.href='@{/admin/potion/potionList(page=${page})}'|">리스트</button>
-					</td>
-				</tr>
-			</table>
+		<div class="title-container">
+			<span>포션 상세 정보</span>
 		</div>
+		
+		<div class="detail-card">
+			<div class="card-header">
+				<h2 th:text="${dto.potionName}"></h2>
+			</div>
+		
+			<div class="card-body">
+				<div class="detail-image-wrapper">
+					<img th:src="@{/uploads/potion/{imageName}(imageName=${dto.potionPhoto})}" alt="재료 이미지">
+				</div>
+				<div class="detail-info">
+					<div class="info-item">
+						<span class="info-label">설명</span>
+						<p th:text="${dto.potionDescription}" style="white-space: pre-line;"></p>
+					</div>
+					<div class="info-item">
+						<span class="info-label">레벨</span>
+						<p class="info-value" th:text="${'Lv. ' + dto.potionLevel}"></p>
+					</div>
+					<div class="info-item">
+						<span class="info-label">맛</span>
+						<p class="info-value" th:text="${dto.tasteDescription}"></p>
+					</div>
+					<div class="info-item">
+						<span class="info-label">조합법 설명</span>
+						<p th:text="${dto.potionComposition}" style="white-space: pre-line;"></p>
+					</div>
+					<div class="info-item">
+						<span class="info-label">메모</span>
+						<p th:text="${dto.potionMemo}" style="white-space: pre-line;"></p>
+					</div>
+					<div class="info-item">
+						<span class="info-label">제작 시 획득 수</span>
+						<p class="info-value" th:text="${dto.quantity + '개'}"></p>
+					</div>
+					<div class="info-item">
+						<span class="info-label">제작 시 획득 경험치</span>
+						<p class="info-value" th:text="${dto.exp + 'EXP'}"></p>
+					</div>
+					<div class="info-item">
+					    <span class="info-label">포션 재료</span>
+					    <p class="info-value" th:text="${dto.firstMaterial.materialName + ' x1'} + ', ' + ${dto.secondMaterial.materialName + ' x1'}"></p>
+					</div>
+
+				</div>
+			</div>
+		
+			<div class="card-footer">
+				<div>
+					<button type="button" class="btn btn-primary" th:onclick="|location.href='@{/admin/potion/update/{potionId}(potionId=${dto.potionId}, page=${page})}'|">수정</button>
+					
+					<button type="button" class="btn btn-danger" th:onclick="deleteOk()">삭제</button>
+				</div>
+				<button type="button" class="btn btn-secondary" th:onclick="|location.href='@{/admin/potion/potionList(page=${page})}'|">목록으로</button>
+			</div>
+		</div>
+
+		<form id="deleteForm" th:action="@{/admin/potion/delete/{potionId}(potionId=${dto.potionId})}" method="post">
+			<input type="hidden" name="page" th:value="${page}">
+			<input type="hidden" name="schType" th:value="${schType}">
+			<input type="hidden" name="kwd" th:value="${kwd}">
+		</form>
+		
 	</div>
 </div>
+
 <script type="text/javascript">
 function deleteOk() {
-	if(confirm('위 자료를 삭제 하시겠습니까 ?')) {
-		let potionId = '[[${dto.potionId}]]';
-		let page = '[[${page}]]';
-		let url = `/admin/potion/delete/${potionId}?page=${page}`;
-		location.href = url;
+	if(confirm('포션을 삭제 하시겠습니까?')) {
+		document.getElementById('deleteForm').submit();
 	}
 }
 </script>
