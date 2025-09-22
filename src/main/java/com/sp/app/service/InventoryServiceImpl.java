@@ -32,22 +32,15 @@ public class InventoryServiceImpl implements InventoryService {
 
 	@Override
 	public Page<Inventory> listPage(String schType, String kwd, int current_page, int size) {
-		Page<Inventory> inventory = null;
-		
-		try {
-			Pageable pageable = PageRequest.of(current_page -1, size, Sort.by(Sort.Direction.DESC, "inventoryId"));
-		    
-			if (kwd == null || kwd.isBlank()) {
-			    inventory = inventoryRepository.findAll(pageable);
-			} else {
-			    inventory = inventoryRepository.findAll(pageable);
-			}
+	    Pageable pageable = PageRequest.of(current_page -1, size, Sort.by(Sort.Direction.DESC, "inventoryId"));
 
-		} catch (IllegalArgumentException e) {
-		} catch (Exception e) {
-			log.info("listPage", e);
-		}
-		return inventory;
+	    if ("material".equals(schType)) {
+	        return inventoryRepository.findByMaterialIsNotNull(pageable);
+	    } else if ("potion".equals(schType)) {
+	        return inventoryRepository.findByPotionIsNotNull(pageable);
+	    } else {
+	        return inventoryRepository.findAll(pageable);
+	    }
 	}
 
 	@Override

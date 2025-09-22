@@ -40,52 +40,37 @@ public class WorkroomController {
 	}
 	
 	@GetMapping("inventoryList")
-	public String list(@RequestParam(name = "page", defaultValue = "1") int current_page,
-			@RequestParam(name = "schType", defaultValue = "all") String schType,
-			@RequestParam(name = "kwd", defaultValue = "") String kwd,
-			Model model,
-			HttpSession session) throws Exception {
-		
-		try {
-			SessionInfo loginUser = (SessionInfo) session.getAttribute("loginUser");  
-	        
-			kwd = myUtil.decodeUrl(kwd);
-			
-			int total_page = 0;
-			int size = 10;
-			long dataCount = 0;
-			List<Inventory> list = null;
-			
-			Page<Inventory> pageInventory = inventoryserive.listPage(schType, kwd, current_page, size);
-			
-			if(pageInventory.isEmpty()) {
-				current_page = 0;
-			} else {
-				total_page = pageInventory.getTotalPages();
-				
-				if(current_page > total_page && total_page > 0) {
-					current_page = total_page;
-					pageInventory = inventoryserive.listPage(schType, kwd, current_page, size);
-				}
-				
-				dataCount = pageInventory.getTotalElements();
-				
-				list = pageInventory.getContent();
-			}			
-			
-			model.addAttribute("loginUser", loginUser);  
-			model.addAttribute("list", list);
-			model.addAttribute("page", current_page);
-			model.addAttribute("dataCount", dataCount);
-			model.addAttribute("size", size);
-			model.addAttribute("total_page", total_page);
-			
-			model.addAttribute("schType", schType);
-			model.addAttribute("kwd", kwd);
-			
-		} catch (Exception e) {
-			log.info("materialList: ", e);
-		}
-		return "work/inventory :: inventoryList";
+	public String list(
+	        @RequestParam(name = "page", defaultValue = "1") int current_page,
+	        @RequestParam(name = "schType", defaultValue = "material") String schType,
+	        @RequestParam(name = "kwd", defaultValue = "") String kwd,
+	        Model model,
+	        HttpSession session) throws Exception {
+
+	    try {
+	        SessionInfo loginUser = (SessionInfo) session.getAttribute("loginUser");  
+	        kwd = myUtil.decodeUrl(kwd);
+
+	        int size = 10;
+	        Page<Inventory> pageInventory = inventoryserive.listPage(schType, kwd, current_page, size);
+
+	        int total_page = pageInventory.getTotalPages();
+	        long dataCount = pageInventory.getTotalElements();
+
+	        List<Inventory> list = pageInventory.getContent();
+
+	        model.addAttribute("loginUser", loginUser);
+	        model.addAttribute("list", list);
+	        model.addAttribute("page", current_page);
+	        model.addAttribute("dataCount", dataCount);
+	        model.addAttribute("size", size);
+	        model.addAttribute("total_page", total_page);
+	        model.addAttribute("schType", schType);
+	        model.addAttribute("kwd", kwd);
+
+	    } catch (Exception e) {
+	        log.info("inventoryList: ", e);
+	    }
+	    return "work/inventory :: inventoryList";
 	}
 }

@@ -1,37 +1,29 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>인벤토리</title>
 <link rel="stylesheet" th:href="@{/dist/css/all.css}" type="text/css">
-<link rel="stylesheet" th:href="@{/dist/css/workroom.css}" type="text/css">
+<link rel="stylesheet" th:href="@{/dist/css/inventory.css}" type="text/css">
+</head>
 <body>
 <div th:fragment="inventoryList">
-    <table>
-        <thead>
-            <tr>
-                <th>번호</th>
-                <th>이름</th>
-                <th>수량</th>
-                <th>구분</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="dto, status: ${list}">
-                <td th:text="${dataCount - (page-1)*size - status.index}"></td>
+   <div th:each="dto, status : ${list}" class="inventory-item">
+	    <div class="item-box">
+	        <img th:if="${dto.potion != null}" 
+	             th:src="@{/uploads/potion/{imageName}(imageName=${dto.potion.potionPhoto})}" 
+	             alt="포션 이미지">
+	        <img th:if="${dto.material != null}" 
+	             th:src="@{/uploads/material/{imageName}(imageName=${dto.material.materialPhoto})}" 
+	             alt="재료 이미지">
+	        <span class="item-quantity" th:text="${dto.quantity}"></span>
+	    </div>
+	</div>
+	
+	<div th:if="${#lists.isEmpty(list)}" class="empty-inventory">
 
-                <td th:if="${dto.potion != null}" th:text="${dto.potion.potionName}"></td>
-
-                <td th:if="${dto.material != null}" th:text="${dto.material.materialName}"></td>
-
-                <td th:text="${dto.quantity}"></td>
-
-                <td th:text="${dto.potion != null ? '포션' : '재료'}"></td>
-            </tr>
-
-            <tr th:if="${#lists.isEmpty(list)}" class="empty-row">
-                <td colspan="4">인벤토리가 비었습니다.</td>
-            </tr>
-        </tbody>
-    </table>
-    <div class="page-navigation"></div>
+	</div>
+<input type="hidden" id="totalPageVal" th:value="${total_page}">
 </div>
 </body>
 </html>

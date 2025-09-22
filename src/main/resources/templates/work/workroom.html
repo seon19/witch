@@ -1,76 +1,127 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>위치 크래프트</title>
-<link rel="stylesheet" th:href="@{/dist/css/all.css}" type="text/css">
-<link rel="stylesheet" th:href="@{/dist/css/workroom.css}" type="text/css">
-
-</head>
-<body>
-
-<div class="main-container">
-	<div class="title-container">
-		<span class="logo">위치 크래프트</span>
-		<button th:onclick="|location.href='@{/member/login}'|">로그아웃</button>
-	</div>
-
-	<div class="main-navigation">
-		<div class="menu-container">
-			<span> MENU</span>
-			<button th:onclick="|location.href='@{}'|">공지사항</button>
-			<button th:onclick="|location.href='@{}'|">자유게시판</button>
+	<!DOCTYPE html>
+	<html>
+	<head>
+	<meta charset="UTF-8">
+	<title>위치 크래프트</title>
+	<link rel="stylesheet" th:href="@{/dist/css/all.css}" type="text/css">
+	<link rel="stylesheet" th:href="@{/dist/css/workroom.css}" type="text/css">
+	
+	</head>
+	<body>
+	
+	<div class="main-container">
+		<div class="title-container">
+			<span class="logo">위치 크래프트</span>
+			<button th:onclick="|location.href='@{/member/login}'|">로그아웃</button>
 		</div>
 	
-		<div class="button-container">
-			<button th:onclick="|location.href='@{/work/workroom}'|">공방</button>
-			<button class="spBtn2" th:onclick="|location.href='@{}'|">레시피북</button>
-			<button class="spBtn3" th:onclick="|location.href='@{/orders/purchaseList}'|">상점</button>
-			<button class="spBtn4" th:onclick="|location.href='@{}'|">의뢰받기</button>
-		</div>
-	</div>
-	
-	<div class="tool-container">
-		<button type="button"><img src="/dist/images/솥1.png" alt=""></button>
-	</div>
-		<div class="create-container">
-		<button type="button"><img src="/dist/images/제작하기.png" alt=""></button>
-	</div>
-	
-	
-	<!-- 인벤토리 리스트 -->
-	<div class="inventory-container" id="inventoryArea">
+		<div class="main-navigation">
+			<div class="menu-container">
+				<span> MENU</span>
+				<button th:onclick="|location.href='@{}'|">공지사항</button>
+				<button th:onclick="|location.href='@{}'|">자유게시판</button>
+			</div>
 		
+			<div class="button-container">
+				<button th:onclick="|location.href='@{/work/workroom}'|">공방</button>
+				<button class="spBtn2" th:onclick="|location.href='@{}'|">레시피북</button>
+				<button class="spBtn3" th:onclick="|location.href='@{/orders/purchaseList}'|">상점</button>
+				<button class="spBtn4" th:onclick="|location.href='@{}'|">의뢰받기</button>
+			</div>
+		</div>
+		
+		<div class="tool-container">
+			<button type="button"><img src="/dist/images/솥1.png" alt=""></button>
+		</div>
+			<div class="create-container">
+			<button type="button"><img src="/dist/images/제작하기.png" alt=""></button>
+		</div>
+		
+		
+		<!-- 인벤토리 리스트 -->
+		<div class="inventory-container">
+	  
+	  		<!-- 탭 -->
+		  <div class="inventory-tabs" id="inventoryTabs">
+		    <button data-type="material" class="active">재료</button>
+		    <button data-type="potion">물약</button>
+		  </div>
+		  
+		  <!-- 카테고리 타이틀 -->
+		  <div class="inventory-category" id="inventoryCategory"><span th:text="${loginUser != null ? loginUser.name : 'Guest'} + '님의 인벤토리'"></span></div>
+		
+		
+		  <div class="inventory-list" id="inventoryArea">
+		      <!-- 여기서 AJAX로 inventory.html의 fragment가 들어옴 -->
+		  </div>
+		</div>
+			
+	
+		
+		<!-- 인벤토리 상세 -->
+		<div class="inventory-detail" id="inventoryDetail">
+		
+		</div>
+		
+		<div class="log-container">
+			<p>로그 상세 영역</p>
+		</div>
 	</div>
 	
-	<!-- 인벤토리 상세 -->
-	<div class="inventory-detail" id="inventoryDetail"></div>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script>
+	let currentPage = 1;
+	let totalPage = 1;
+	let currentType = "material";
+	let loading = false;
 	
-	<div class="log-container">
-		<p>로그 상세 영역</p>
-	</div>
+	$(function(){
+	    loadInventory(1, currentType);
 	
-</div>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-$(function(){
-    loadInventory(1);
-});
-
-function loadInventory(page) {
-    $.ajax({
-        url: "/work/inventoryList",
-        type: "GET",
-        data: { page: page },
-        success: function(fragment) {
-            $("#inventoryArea").html(fragment); 
-        },
-        error: function() {
-            alert("인벤토리를 불러오는 데 실패했습니다.");
-        }
-    });
-}
-</script>
-</body>
-</html>
+	    $("#inventoryTabs").on("click", "button", function(){
+	        $("#inventoryTabs button").removeClass("active");
+	        $(this).addClass("active");
+	
+	        currentType = $(this).data("type");
+	        currentPage = 1;
+	        $("#inventoryArea").empty();
+	        loadInventory(currentPage, currentType);
+	    });
+	
+	    $(window).on("scroll", function(){
+	        if(loading) return;
+	        if($(window).scrollTop() + $(window).height() >= $(document).height() - 100){
+	            if(currentPage < totalPage){
+	                currentPage++;
+	                loadInventory(currentPage, currentType);
+	            }
+	        }
+	    });
+	});
+	
+	function loadInventory(page, schType){
+	    loading = true;
+	    $.ajax({
+	        url: "/work/inventoryList",
+	        type: "GET",
+	        data: { page: page, schType: schType },
+	        success: function(fragment){
+	            if(page === 1){
+	            	let $fragment = $(fragment).children();
+	            	$("#inventoryArea").html($fragment);
+	            } else {
+	                $("#inventoryArea").append(fragment);
+	            }
+	
+	            totalPage = $("#inventoryArea").find("#totalPageVal").val() || totalPage;
+	            loading = false;
+	        },
+	        error: function(){
+	            alert("인벤토리를 불러오는 데 실패했습니다.");
+	            loading = false;
+	        }
+	    });
+	}
+	</script>
+	</body>
+	</html>
