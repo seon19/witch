@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>관리자 페이지</title>
+
+<link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" type="text/css">
+<link rel="stylesheet" th:href="@{/dist/css/cssAdmin/materialWrite.css}" type="text/css">
+
+</head>
+<body>
+
+<div class="main-container">
+	<div th:replace="~{/admin/menubar :: menubarFragment}"></div>
+
+	<div class="body-container">
+		<div class="title-container">
+			<span>구매 품목 관리</span>
+		</div>
+		
+		<div class="table-container">
+			<form th:action="@{/admin/material/{mode}(mode=${mode})}" name="materialForm" method="post" enctype="multipart/form-data">
+				<table>
+					<tr>
+						<td>재료 이름</td>
+						<td>
+							<input type="text" name="materialName" th:value="${dto!=null ? dto.materialName : ''}">
+						</td>
+					</tr>
+					<tr>
+						<td>재료 설명</td>
+						<td>
+							<input type="text" name="materialDescription" th:value="${dto!=null ? dto.materialDescription : ''}">
+						</td>
+					</tr>
+					<tr>
+						<td>재료 가격</td>
+						<td>
+							<input type="text" name="materialPrice" th:value="${dto!=null ? dto.materialPrice : ''}" placeholder="숫자를 입력하세요.">
+						</td>
+					</tr>
+					<tr>
+						<td>재료 레벨</td>
+						<td>
+							<input type="text" name="materialLevel" th:value="${dto!=null ? dto.materialLevel : ''}" placeholder="0~5 사이의 숫자를 입력하세요.">
+						</td>
+					</tr>
+					<tr>
+						<td>재료 효과</td>
+						<td>
+							<input type="text" name="materialEffect" th:value="${dto!=null ? dto.materialEffect : ''}">
+						</td>
+					</tr>
+					<tr>
+						<td>재료 사진 파일</td>
+						<td>
+							<input type="file" name="selectFile" id="selectFile">
+						</td>
+					</tr>
+					<tr>
+						<td>이미지 미리보기</td>
+						<td id="preview-image-container">
+							<th:block th:if="${mode=='update' and dto.materialPhoto != null}">
+								<img id="preview-image" th:src="@{/uploads/material/{imageName}(imageName=${dto.materialPhoto})}">
+							</th:block>
+							<th:block th:if="${mode=='write' or dto.materialPhoto == null}">
+								<img id="preview-image" src="">
+							</th:block>
+						</td>
+					</tr>
+				</table>
+				
+				<table>
+					<tr>
+						<td>
+							<div class="form-buttons">
+							    <button type="button" class="btn btn-primary" onclick="sendOk();" th:text="${mode=='write'?'등록 완료':'수정 완료'}"></button>
+							    <button type="reset" class="btn btn-outline">다시 입력</button>
+							    <button type="button" class="btn btn-secondary" th:onclick="|location.href='@{/admin/material/materialList}'|" th:text="${mode=='write'?'등록 취소':'수정 취소'}"></button>
+							
+							    <th:block th:if="${mode=='update'}">
+							        <input type="hidden" name="materialId" th:value="${dto.materialId}">
+							        <input type="hidden" name="page" th:value="${page}">
+							        <input type="hidden" name="materialPhoto" th:value="${dto.materialPhoto}">
+							    </th:block>
+							</div>
+						</td>
+					</tr>
+				</table>
+			</form>
+		</div>		
+	</div>
+</div>
+
+<script type="text/javascript">
+window.addEventListener('DOMContentLoaded', function() {
+	const selectFile = document.getElementById('selectFile');
+	const previewImage = document.getElementById('preview-image');
+	
+	selectFile.addEventListener('change', function(e) {
+		const files = e.target.files;
+		if(files && files.length > 0) {
+			const file = files[0];
+			const reader = new FileReader();
+			
+			reader.onload = function(e) {
+				previewImage.src = e.target.result;
+			};
+			
+			reader.readAsDataURL(file);
+		}
+	});
+});
+
+function sendOk() {
+	const f = document.materialForm;
+	let p = '';
+	
+	let str = f.materialName.value;
+	if(!str) {
+		alert('재료 이름을 입력해주세요.');
+		f.materialName.focus();
+		return;
+	}
+	
+	str = f.materialDescription.value;
+	if(!str) {
+		alert('재료 설명을 입력해주세요.');
+		f.materialDescription.focus();
+		return;
+	}
+	
+	p = /^[0-9]+$/;
+	str = f.materialPrice.value;
+	if(!str) {
+		alert('재료 가격을 입력해주세요.');
+		f.materialPrice.value = '';
+		f.materialPrice.focus();
+		return;
+	}
+	
+	p = /^[0-5]$/;
+	str = f.materialLevel.value;
+	if(!p.test(str)) {
+		alert('재료 레벨을 입력해주세요.');
+		f.materialLevel.value = '';
+		f.materialLevel.focus();
+		return;
+	}
+	
+	str = f.materialEffect.value;
+	if(!str) {
+		alert('재료 효과를 입력해주세요.');
+		f.materialEffect.focus();
+		return;
+	}
+	
+	const mode = '[[${mode}]]';
+	if(mode === 'write') {
+		str = f.selectFile.value;
+		if(!str) {
+			alert('재료 사진을 업로드해주세요.');
+			f.selectFile.focus();
+			return;
+		}
+	}
+	
+	f.submit();
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>관리자 페이지</title>
+
+<link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" type="text/css">
+<link rel="stylesheet" th:href="@{/dist/css/cssAdmin/materialDetail.css}" type="text/css">
+<style>
+    /* 판매 상태 표시를 위한 간단한 스타일 */
+    .status-true { color: #28a745; font-weight: 600; }
+    .status-false { color: #6c757d; }
+</style>
+</head>
+<body>
+
+<div class="main-container">
+	<div th:replace="~{/admin/menubar :: menubarFragment}"></div>
+
+	<div class="body-container">
+	
+		<div class="title-container">
+			<span>판매 품목 상세 정보</span>
+		</div>
+		
+		<div class="detail-card">
+			<div class="card-header">
+				<h2 th:text="${dto.material.materialName}">재료 이름</h2>
+			</div>
+		
+			<div class="card-body">
+				<div class="detail-image-wrapper">
+					<img th:src="@{/uploads/material/{imageName}(imageName=${dto.material.materialPhoto})}" alt="재료 이미지">
+				</div>
+				<div class="detail-info">
+					<div class="info-item">
+						<span class="info-label">효과</span>
+						<p class="info-value" th:text="${dto.material.materialEffect}"></p>
+					</div>
+					<div class="info-item">
+						<span class="info-label">설명</span>
+						<p class="info-value" th:text="${dto.material.materialDescription}"></p>
+					</div>
+					<div class="info-item-group">
+						<div class="info-item">
+							<span class="info-label">기존 가격</span>
+							<p class="info-value" th:text="${#numbers.formatInteger(dto.material.materialPrice, 3, 'COMMA') + '원'}"></p>
+						</div>
+						<div class="info-item">
+							<span class="info-label">판매 가격</span>
+							<p class="info-value" th:text="${#numbers.formatInteger(dto.sellingPrice, 3, 'COMMA') + '원'}"></p>
+						</div>
+					</div>
+                    <div class="info-item">
+						<span class="info-label">판매 여부</span>
+						<p class="info-value">
+                            <span th:text="${dto.isAvailable ? '판매중' : '판매중지'}"
+                                  th:classappend="${dto.isAvailable ? 'status-true' : 'status-false'}"></span>
+                        </p>
+					</div>
+				</div>
+			</div>
+		
+			<div class="card-footer">
+				<div>
+					<button type="button" class="btn btn-primary" th:onclick="|location.href='@{/admin/orders/saleUpdate/{shopId}(shopId=${dto.shopId}, page=${page})}'|">수정</button>
+					<button type="button" class="btn btn-danger" th:onclick="deleteOk()">삭제</button>
+				</div>
+				<button type="button" class="btn btn-secondary" th:onclick="|location.href='@{/admin/orders/saleList(page=${page})}'|">목록으로</button>
+			</div>
+		</div>
+
+		<form id="deleteForm" th:action="@{/admin/orders/saleDelete/{shopId}(shopId=${dto.shopId})}" method="post">
+			<input type="hidden" name="page" th:value="${page}">
+			<input type="hidden" name="schType" th:value="${schType}">
+			<input type="hidden" name="kwd" th:value="${kwd}">
+		</form>
+		
+	</div>
+</div>
+
+<script type="text/javascript">
+function deleteOk() {
+	if(confirm('해당 판매 품목을 삭제 하시겠습니까?')) {
+		document.getElementById('deleteForm').submit();
+	}
+}
+</script>
+
+</body>
+</html>

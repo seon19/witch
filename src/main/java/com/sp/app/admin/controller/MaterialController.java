@@ -115,7 +115,7 @@ public class MaterialController {
 	}
 	
 	@GetMapping("materialDetail/{materialId}")
-	public String materialDetail(@PathVariable("materialId") long materialId, @RequestParam(name = "page") String page,
+	public String materialDetail(@PathVariable("materialId") long materialId, @RequestParam(name = "page") int page,
 			@RequestParam(name = "schType", defaultValue = "all") String schType,
 			@RequestParam(name = "kwd", defaultValue = "") String kwd,
 			Model model) throws Exception {
@@ -219,7 +219,7 @@ public class MaterialController {
 	
 	@PostMapping("delete/{materialId}")
 	public String materialDelete(@PathVariable("materialId") long materialId,
-			@RequestParam(name = "page") String page,
+			@RequestParam(name = "page") int page,
 			@RequestParam(name = "schType", defaultValue = "all") String schType,
 			@RequestParam(name = "kwd", defaultValue = "") String kwd) {
 		

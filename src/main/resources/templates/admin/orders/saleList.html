@@ -5,14 +5,144 @@
 <title>관리자 페이지</title>
 
 <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" type="text/css">
+<link rel="stylesheet" th:href="@{/dist/css/cssAdmin/materialList.css}" type="text/css">
+<style type="text/css">
+.status-true {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.status-false {
+    color: #6c757d;
+}
+</style>
 </head>
 <body>
 
-<div>
-	<div th:replace="~{/admin/menubar}"></div>
+<div class="main-container">
+	<div th:replace="~{/admin/menubar :: menubarFragment}"></div>
 
+	<div class="body-container">
+
+		<header class="content-header">
+			<div class="header-top">
+				<div class="title-container">
+					<span>판매 품목 관리</span>
+				</div>
+			</div>
+
+			<div class="header-bottom">
+				
+				<div>
+					<form name="searchForm" class="form-search">
+						<select name="schType">
+							<option value="name" th:selected="${schType} == 'materialName'">품목 이름</option>
+						</select>
+						<input type="text" name="kwd" th:value="${kwd}">
+						<button type="button" class="btn-default" onclick="searchList()">검색</button>
+					</form>
+				</div>
+				<div>
+					<button type="button" th:onclick="|location.href='@{/admin/orders/saleWrite}'|">판매 품목 추가</button>
+				</div>
+			</div>
+		</header>
+
+
+		<div>
+			<span class="dataCount"></span>
+		</div>
+		<div class="table-container">
+			<table>
+				<thead>
+					<tr>
+						<th>번호</th>
+						<th>품목 이미지</th>
+						<th>품목 이름</th>
+						<th>품목 기존 가격</th>
+						<th>품목 판매 가격</th>
+						<th>판매 여부</th> </tr>
+					</tr>
+				</thead>
+				<tbody>
+    <tr th:each="dto, status: ${list}">
+        <td th:text="${dataCount-(page-1)*size-status.index}"></td>
+        <td>
+            <img th:src="@{/uploads/material/{imageName}(imageName=${dto.material.materialPhoto})}" width="80" height="80" style="object-fit: cover;">
+        </td>
+        <td>
+            <a th:href="@{/admin/orders/saleDetail/{shopId}(shopId=${dto.shopId}, page=${page})}" th:text="${dto.material.materialName}"></a>
+        </td>
+        <td th:text="${#numbers.formatInteger(dto.material.materialPrice, 3, 'COMMA') + '원'}"></td>
+        
+        <td th:text="${#numbers.formatInteger(dto.sellingPrice, 3, 'COMMA') + '원'}"></td>
+	    <td>
+				<span th:text="${dto.isAvailable ? '판매중' : '판매중지'}"
+					  th:classappend="${dto.isAvailable ? 'status-true' : 'status-false'}"></span>
+			</td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(list)}" class="empty-row">
+        <td colspan="6">등록된 판매 중 품목이 없습니다.</td>
+    </tr>
+</tbody>
+			</table>
+			
+			<div class="table-footer">
+				<div class="page-navigation"></div>
+						
+				<div>
+					<button type="button" class="btn btn-outline" th:onclick="|location.href='@{/admin/orders/saleList}'|">새로고침</button>
+				</div>
+			</div>
+		</div>
+	</div>
 
 </div>
 
+<script type="text/javascript" th:src="@{/dist/js/paging.js}"></script>
+<script type="text/javascript">
+window.addEventListener('DOMContentLoaded', function() {
+	let page = '[[${page}]]';
+	let pageSize = '[[${size}]]';
+	let dataCount = parseInt('[[${dataCount}]]') || 0;
+	let url = '[[@{/admin/orders/saleList}]]';
+	let search = '[[${not #strings.isEmpty(kwd)}]]';
+	
+	if(search === 'true') {
+		url = '[[@{/admin/orders/saleList(schType=${schType}, kwd=${kwd})}]]';
+	}
+	
+	let total_page = pageCount(dataCount, pageSize);
+	let paging = pagingUrl(page, total_page, url);
+	
+	document.querySelector('.dataCount').innerHTML = `${dataCount}개 (${page}/${total_page} 페이지)`;
+	document.querySelector('.page-navigation').innerHTML = dataCount === 0 ? '' : paging
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+	const inputEL = document.querySelector('form input[name=kwd]'); 
+	inputEL.addEventListener('keydown', function (evt) {
+	    if(evt.key === 'Enter') {
+	    	evt.preventDefault();
+	    	
+	    	searchList();
+	    }
+	});
+});
+
+function searchList() {
+	const f = document.searchForm;
+	if(! f.kwd.value.trim()) {
+		return;
+	}
+	
+	const formData = new FormData(f);
+	let params = new URLSearchParams(formData).toString();
+	
+	let url = '[[@{/admin/orders/saleList}]]';
+	location.href = url + '?' + params;
+}
+
+</script>
 </body>
 </html>
