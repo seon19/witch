@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 public class MaterialReward {
     @EmbeddedId   
-    private MaterialRewardId id;
+    private MaterialRewardId id = new MaterialRewardId();
 
     @Column(name = "qty", nullable = false)
     private Integer qty = 1;  

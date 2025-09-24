@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>관리자 페이지</title>
+  <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" type="text/css">
+  <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/requestWrite.css}" type="text/css">
+</head>
+<body>
+
+<div class="main-container">
+  <div th:replace="~{/admin/menubar :: menubarFragment}"></div>
+
+  <div class="body-container">
+    <div class="title-container">
+      <span th:text="${mode}=='update' ? '의뢰 수정' : '의뢰 등록'">의뢰 등록</span>
+    </div>
+
+    <div class="table-container">
+      <form name="requestForm"
+            th:object="${req}"
+            th:action="${mode}=='update'
+                        ? @{/admin/request/{id}/update(id=${req.requestId})}
+                        : @{/admin/request/write}"
+            method="post">
+        <input type="hidden" name="page" th:value="${page}">
+
+        <table>
+          <tr>
+            <td>레벨</td>
+            <td>
+              <select th:field="*{requestLevel}" required style="width: 20%;">
+                <option value="">-- 선택 --</option>
+                <option th:each="lv : ${#numbers.sequence(1,5)}"
+                        th:value="${lv}" th:text="|Lv. ${lv}|"></option>
+              </select>
+            </td>
+          </tr>
+
+          <tr>
+            <td>의뢰인</td>
+            <td><input type="text" th:field="*{client}" required></td>
+          </tr>
+
+          <tr>
+            <td>의뢰명</td>
+            <td><input type="text" th:field="*{requestName}" required></td>
+          </tr>
+
+          <tr>
+            <td>의뢰내용</td>
+            <td><textarea rows="4" style="width:100%; resize:none;" th:field="*{requestContent}" required></textarea></td>
+          </tr>
+			
+		  <tr>
+			  <td>요구 개수</td>
+			  <td><input type="text" min="1" step="1" name="goalCount" th:value="${mode}=='update' ? ${req.goalCount} : ''"></td>
+		  </tr>
+		  
+          <tr>
+            <td>보상(경험치)</td>
+            <td><input type="text" min="0" step="1" th:field="*{rewardExp}"></td>
+          </tr>
+
+          <tr>
+            <td>보상(골드)</td>
+            <td><input type="text" min="0" step="1" th:field="*{rewardGold}"></td>
+          </tr>
+
+          <tr>
+            <td>보상(아이템)</td>
+            <td>
+              <button type="button" class="btn btn-primary" onclick="openMaterialModal()">아이템 선택</button>
+              <div class="reward-list" style="margin-top:10px;">
+                <table id="rewardTable">
+                  <thead>
+                    <tr>
+                      <th style="width:60px;">이미지</th>
+                      <th>이름</th>
+                      <th style="width:110px;">수량</th>
+                      <th style="width:90px;"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="rewardTbody">
+                    <tr class="empty-row"><td colspan="4">선택된 보상 아이템이 없습니다.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+        </table>
+
+        <table>
+          <tr>
+            <td>
+              <div class="form-buttons">
+                <button type="button" class="btn btn-primary" onclick="submitRequest()"
+                        th:text="${mode}=='update' ? '수정 완료' : '등록 완료'">등록 완료</button>
+                <button type="reset" class="btn btn-outline"
+                        th:text="${mode}=='update' ? '다시 입력' : '다시 입력'">다시 입력</button>
+                <button type="button" class="btn btn-secondary"
+                        th:text="${mode}=='update' ? '수정 취소' : '등록 취소'"
+                        th:onclick="|location.href='@{/admin/request/requestList}'|">등록 취소</button>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="modalBackdrop" class="modal-backdrop"></div>
+<div id="materialModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+  <header>
+    <span>재료 검색</span>
+    <button type="button" class="btn small" onclick="closeMaterialModal()">닫기</button>
+  </header>
+  <div class="content">
+    <div style="display:flex; gap:8px; margin-bottom:12px;">
+      <input id="q" type="text" placeholder="재료 이름으로 검색" style="flex:1;">
+      <button type="button" class="btn" onclick="searchMaterials()">검색</button>
+    </div>
+    <div id="matResult"></div>
+  </div>
+  <div class="footer">
+    <button type="button" class="btn btn-secondary" onclick="closeMaterialModal()">닫기</button>
+  </div>
+</div>
+
+<script th:inline="javascript">
+  const URL_MAT_SEARCH      = /*[[@{/admin/request/material/search}]]*/ '';
+  const URL_MATERIAL_IMGDIR = /*[[@{/uploads/material/}]]*/ '';
+  const URL_NO_IMAGE        = /*[[@{/images/noimage.png}]]*/ '';
+
+  const rewards = new Map();
+
+  function openMaterialModal() {
+    document.getElementById('modalBackdrop').style.display = 'block';
+    const m = document.getElementById('materialModal');
+    m.style.display = 'block';
+    if (!document.getElementById('matResult').dataset.initialized) {
+      searchMaterials();
+    }
+  }
+  function closeMaterialModal() {
+    document.getElementById('modalBackdrop').style.display = 'none';
+    document.getElementById('materialModal').style.display = 'none';
+  }
+
+  async function searchMaterials() {
+    const q = document.getElementById('q').value || '';
+    const url = URL_MAT_SEARCH + '?q=' + encodeURIComponent(q);
+    const res = await fetch(url, { headers: { 'Accept': 'application/json' }});
+    const list = await res.json();
+
+    const wrap = document.getElementById('matResult');
+    wrap.dataset.initialized = '1';
+    if (!list || list.length === 0) {
+      wrap.innerHTML = '<div style="padding:16px; color:#666;">검색 결과가 없습니다.</div>';
+      return;
+    }
+
+    wrap.innerHTML = '';
+    list.forEach(m => {
+      const row = document.createElement('div');
+      row.className = 'material-row';
+
+      const img = document.createElement('img');
+      img.alt = m.name;
+      img.src = m.photo ? (URL_MATERIAL_IMGDIR + m.photo) : URL_NO_IMAGE;
+
+      const left = document.createElement('div');
+      left.style.display = 'flex';
+      left.style.alignItems = 'center';
+      left.style.gap = '12px';
+      left.appendChild(img);
+
+      const nameWrap = document.createElement('div');
+      nameWrap.innerHTML = `<div class="lev">Lv. ${m.level ?? '-'}</div><div style="font-weight:600;">${m.name}</div>`;
+  
+      const qtyBox = document.createElement('input');
+      qtyBox.type = 'number';
+      qtyBox.min = '1';
+      qtyBox.step = '1';
+      qtyBox.value = '1';
+      qtyBox.className = 'qty-input';
+
+      const addBtn = document.createElement('button');
+      addBtn.type = 'button';
+      addBtn.className = 'btn small';
+      addBtn.textContent = '추가';
+      addBtn.onclick = () => addReward(m, parseInt(qtyBox.value || '1', 10));
+
+      row.appendChild(left);
+      row.appendChild(nameWrap);
+      row.appendChild(qtyBox);
+      row.appendChild(addBtn);
+      wrap.appendChild(row);
+    });
+  }
+
+  function addReward(material, qty) {
+    if (!qty || qty <= 0) qty = 1;
+    const key = String(material.id);
+    const prev = rewards.get(key);
+    if (prev) {
+      prev.qty += qty;
+      rewards.set(key, prev);
+    } else {
+      rewards.set(key, { id: material.id, name: material.name, photo: material.photo, qty });
+    }
+    renderRewardTable();
+  }
+
+  function removeReward(id) {
+    rewards.delete(String(id));
+    renderRewardTable();
+  }
+
+  function changeQty(id, qty) {
+    const item = rewards.get(String(id));
+    if (!item) return;
+    const v = parseInt(qty || '0', 10);
+    item.qty = isNaN(v) || v <= 0 ? 1 : v;
+    rewards.set(String(id), item);
+  }
+
+  function renderRewardTable() {
+    const tbody = document.getElementById('rewardTbody');
+    tbody.innerHTML = '';
+
+    if (rewards.size === 0) {
+      const tr = document.createElement('tr');
+      tr.className = 'empty-row';
+      tr.innerHTML = `<td colspan="4">선택된 보상 아이템이 없습니다.</td>`;
+      tbody.appendChild(tr);
+      return;
+    }
+
+    rewards.forEach(item => {
+      const tr = document.createElement('tr');
+
+      const tdImg = document.createElement('td');
+      const img = document.createElement('img');
+      img.style.width = '44px';
+      img.style.height = '44px';
+      img.style.objectFit = 'cover';
+      img.style.borderRadius = '6px';
+      img.src = item.photo ? (URL_MATERIAL_IMGDIR + item.photo) : URL_NO_IMAGE;
+      tdImg.appendChild(img);
+
+      const tdName = document.createElement('td');
+      tdName.textContent = item.name;
+
+      const tdQty = document.createElement('td');
+      const qtyInput = document.createElement('input');
+      qtyInput.type = 'number';
+      qtyInput.min = '1';
+      qtyInput.step = '1';
+      qtyInput.value = String(item.qty);
+      qtyInput.style.width = '80px';
+      qtyInput.onchange = (e) => changeQty(item.id, e.target.value);
+      tdQty.appendChild(qtyInput);
+
+      const tdAct = document.createElement('td');
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.className = 'btn small';
+      delBtn.textContent = '삭제';
+      delBtn.onclick = () => removeReward(item.id);
+      tdAct.appendChild(delBtn);
+
+      tr.appendChild(tdImg);
+      tr.appendChild(tdName);
+      tr.appendChild(tdQty);
+      tr.appendChild(tdAct);
+      tbody.appendChild(tr);
+    });
+  }
+
+  function submitRequest() {
+    const f = document.requestForm;
+
+    if (!f['requestLevel'].value) { alert('레벨을 선택하세요.'); f['requestLevel'].focus(); return; }
+    if (!f['requestName'].value.trim()) { alert('의뢰명을 입력하세요.'); f['requestName'].focus(); return; }
+    if (!f['requestContent'].value.trim()) { alert('의뢰내용을 입력하세요.'); f['requestContent'].focus(); return; }
+
+    Array.from(f.querySelectorAll('input[name="rewardMaterialId"], input[name="rewardQty"]'))
+      .forEach(el => el.remove());
+
+    rewards.forEach(item => {
+      const hidId = document.createElement('input');
+      hidId.type = 'hidden';
+      hidId.name = 'rewardMaterialId';
+      hidId.value = item.id;
+
+      const hidQty = document.createElement('input');
+      hidQty.type = 'hidden';
+      hidQty.name = 'rewardQty';
+      hidQty.value = item.qty;
+
+      f.appendChild(hidId);
+      f.appendChild(hidQty);
+    });
+
+    f.submit();
+  }
+
+  /*[# th:if="${mode}=='update'"]*/
+  (function initRewardsFromServer() {
+    /*[# th:each="ri : ${rewardItems}"]*/
+    addReward(
+      {
+        id:    /*[[${ri.material.materialId}]]*/ 0,
+        name:  /*[['' + ${ri.material.materialName}]]*/ '',
+        photo: /*[['' + ${ri.material.materialPhoto}]]*/ ''
+      },
+      /*[[${ri.qty}]]*/ 1
+    );
+    /*[/]*/
+  })();
+   /*[/]*/
+
+</script>
+</body>
+</html>

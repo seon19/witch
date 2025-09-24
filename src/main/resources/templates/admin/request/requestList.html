@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>의뢰 관리</title>
+
+  <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" type="text/css" />
+  <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/requestList.css}" type="text/css" />
+</head>
+<body>
+
+<div class="main-container">
+  <div th:replace="~{/admin/menubar :: menubarFragment}"></div>
+
+  <div class="body-container">
+
+    <header class="content-header">
+      <div class="header-top">
+        <div class="title-container">
+          <span>의뢰 관리</span>
+        </div>
+      </div>
+
+      <div class="header-bottom">
+        <div>
+          <form name="searchForm" class="form-search" th:action="@{/admin/request/requestList}" method="get">
+            <select name="schType">
+              <option value="level" th:selected="${schType}=='level'">레벨</option>
+              <option value="all"   th:selected="${schType}=='all'">제목+내용</option>
+            </select>
+            <input type="text" name="kwd" th:value="${kwd}"/>
+            <button type="submit" class="btn-default">검색</button>
+          </form>
+        </div>
+        <div>
+          <button type="button" class="btn-default"
+                  th:onclick="|location.href='@{/admin/request/new}'|">의뢰 등록</button>
+        </div>
+      </div>
+    </header>
+
+    <div><span class="dataCount"></span></div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+        <tr>
+          <th>번호</th>
+          <th>의뢰명</th>
+          <th>레벨</th>
+          <th>경험치</th>
+          <th>골드</th>
+          <th>등록일</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="req, st : ${page.content}">
+          <td th:text="${#numbers.formatInteger(page.totalElements - (page.number * page.size) - st.index, 0)}"></td>
+          <td>
+            <a th:href="@{/admin/request/{id}(id=${req.requestId})}"
+               th:text="${req.requestName}">의뢰명</a>
+          </td>
+          <td th:text="${req.requestLevel}">0</td>
+          <td th:text="${req.rewardExp}">0</td>
+          <td th:text="${req.rewardGold}">0</td>
+          <td th:text="${#temporals.format(req.requestDate, 'yyyy-MM-dd HH:mm')}">-</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(page.content)}" class="empty-row">
+          <td colspan="6">등록된 의뢰가 없습니다.</td>
+        </tr>
+        </tbody>
+      </table>
+
+      <div class="table-footer">
+        <div class="page-navigation-container">
+          <div class="page-navigation"></div>
+        </div>
+        <div class="btn-refresh-container">
+          <button type="button" class="btn btn-outline"
+                  th:onclick="|location.href='@{/admin/request/requestList}'|">새로고침</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script type="text/javascript" th:src="@{/dist/js/paging.js}"></script>
+<script th:inline="javascript">
+  const dataCnt  = /*[[${page.totalElements}]]*/ 0;
+  const pageSize = /*[[${page.size}]]*/ 5;
+  const pageNo   = /*[[${page.number}+1]]*/ 1;  
+
+  let url = /*[[@{/admin/request/requestList}]]*/ '';
+  const hasKwd = /*[[${kwd != null and !#strings.isEmpty(kwd)}]]*/ false;
+  if (hasKwd) {
+    url = /*[[@{/admin/request/requestList(schType=${schType}, kwd=${kwd})}]]*/ '';
+  }
+
+  const totalPg = pageCount(dataCnt, pageSize);
+  const paging  = (dataCnt > 0 && totalPg > 0) ? pagingUrl(pageNo, totalPg, url) : '';
+
+  document.querySelector('.dataCount').innerHTML =
+      `${dataCnt}개 (${pageNo}/${Math.max(1, totalPg)} 페이지)`;
+  document.querySelector('.page-navigation').innerHTML = paging;
+</script>
+
+
+</body>
+</html>
