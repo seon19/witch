@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>공지 상세</title>
+  <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" type="text/css" />
+  <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/noticeDetail.css}" type="text/css" />
+</head>
+<body>
+<div class="main-container">
+  <div th:replace="~{/admin/menubar :: menubarFragment}"></div>
+
+  <div class="body-container">
+    <div class="title-container">
+      <span>공지 상세</span>
+    </div>
+
+    <div class="detail-card">
+      <div class="card-header">
+        <h2 th:text="${notice.noticeName}">공지명</h2>
+      </div>
+
+      <div class="card-body">
+        <div class="detail-info">
+          <div class="info-label">공지명</div>
+          <div class="info-value" th:text="${notice.noticeName}"></div>
+
+          <div class="info-label">공지내용</div>
+          <div class="info-value" th:text="${notice.noticeContent}"></div>
+
+          <div class="info-label">작성자</div>
+          <div class="info-value" th:text="${notice.member != null ? notice.member.nickname : ''}"></div>
+
+          <div class="info-label">등록일자</div>
+          <div class="info-value" th:text="${#temporals.format(notice.noticeDate, 'yyyy-MM-dd HH:mm')}">-</div>
+
+          <div class="info-label">수정일자</div>
+          <div class="info-value" th:text="${notice.noticeUpdateDate != null ? #temporals.format(notice.noticeUpdateDate, 'yyyy-MM-dd HH:mm') : ''}"></div>
+
+          <div class="info-label">공개여부</div>
+          <div class="info-value" th:text="${notice.visibility == 1 ? '공개' : '비공개'}"></div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <div>
+          <button type="button" class="btn btn-primary"
+                  th:onclick="|location.href='@{/admin/notice/{id}/update(id=${notice.noticeId},page=${page},size=${size},kwd=${kwd},visibility=${visibility})}'|">
+            수정
+          </button>
+
+          <form th:action="@{/admin/notice/{id}/delete(id=${notice.noticeId})}" method="post" style="display:inline;"
+                onsubmit="return confirm('삭제하시겠습니까?');">
+            <input type="hidden" name="page" th:value="${page}">
+            <input type="hidden" name="size" th:value="${size}">
+            <input type="hidden" name="kwd" th:value="${kwd}">
+            <input type="hidden" name="visibility" th:value="${visibility}">
+            <button type="submit" class="btn btn-danger">삭제</button>
+          </form>
+        </div>
+
+        <button type="button" class="btn btn-secondary"
+                th:onclick="|location.href='@{/admin/notice/noticeList(page=${page},size=${size},kwd=${kwd},visibility=${visibility})}'|">
+          목록으로
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

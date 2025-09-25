@@ -2,6 +2,8 @@ package com.sp.app.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -31,11 +33,15 @@ public class Notice {
     @Column(name = "noticecontent", nullable = false, length = 1000)
     private String noticeContent;
 
+    @CreationTimestamp
     @Column(name = "noticedate", nullable = false)
     private LocalDateTime noticeDate; 
 
     @Column(name = "noticeupdatedate")
     private LocalDateTime noticeUpdateDate; 
+
+    @Column(name = "visibility", nullable = false)
+    private Integer visibility = 1; 
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memberid", nullable = false)
