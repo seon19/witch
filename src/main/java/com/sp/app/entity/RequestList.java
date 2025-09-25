@@ -32,7 +32,13 @@ public class RequestList {
     private LocalDateTime endRequestDate;
 
     @Column(name = "requeststate", nullable = false)
-    private Boolean requestState; 
+    private int requestState; 
+    
+    @Column(name = "progressgoal", nullable = false)
+    private int progressGoal = 1;
+
+    @Column(name = "progresscount", nullable = false)
+    private int progressCount = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memberid", nullable = false)

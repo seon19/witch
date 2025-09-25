@@ -48,7 +48,13 @@ public class Request {
     private Integer rewardGold; 
 
     @Column(name = "rewardenable", nullable = false)
-    private Boolean rewardEnable; 
+    private Integer rewardEnable; 
+    
+    @Column(name = "goalcount", nullable = false)
+    private Integer goalCount = 1;
+
+    @Column(name = "deadline")
+    private LocalDateTime deadline;
     
     @OneToMany(mappedBy = "request", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<MaterialReward> rewards = new HashSet<>();

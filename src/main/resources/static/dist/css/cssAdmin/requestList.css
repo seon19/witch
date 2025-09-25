@@ -1,0 +1,272 @@
+body {
+	background-color: #f4f6f9;
+	color: #333;
+}
+
+.body-container {
+	padding: 2rem;
+}
+
+.content-header {
+	margin-bottom: 2rem;
+}
+
+.header-main {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 1.5rem;
+}
+
+.header-main h1 {
+	font-size: 2rem;
+	font-weight: 700;
+	color: #212529;
+	margin: 0;
+}
+
+.action-buttons {
+	display: flex;
+	gap: 0.75rem;
+}
+
+.header-filters {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	background-color: #fff;
+	padding: 1rem 1.5rem;
+	border-radius: 8px;
+	border: 1px solid #e0e0e0;
+}
+
+.data-count {
+	font-size: 0.95rem;
+	color: #6c757d;
+	font-weight: 500;
+}
+
+.form-search {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.form-search select,
+.form-search input[type="text"] {
+	padding: 0.5rem 0.75rem;
+	border: 1px solid #ced4da;
+	border-radius: 5px;
+	font-size: 0.9rem;
+	height: 38px;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-search input[type="text"] {
+	width: 220px;
+}
+
+.form-search select:focus,
+.form-search input[type="text"]:focus {
+	outline: none;
+	border-color: #4a90e2;
+	box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+.btn, button, a.btn {
+	padding: 0 1rem;
+	height: 38px;
+	line-height: 36px;
+	border: 1px solid transparent;
+	border-radius: 5px;
+	font-size: 0.9rem;
+	font-weight: 500;
+	cursor: pointer;
+	text-decoration: none;
+	display: inline-block;
+	text-align: center;
+	white-space: nowrap;
+	transition: all 0.2s ease-in-out;
+}
+
+.btn:hover, button:hover, a.btn:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+.btn-primary {
+	background-color: #4a90e2;
+	color: white;
+	border-color: #4a90e2;
+}
+.btn-primary:hover {
+	background-color: #357ABD;
+	border-color: #357ABD;
+}
+
+.btn-secondary {
+	background-color: #6c757d;
+	color: white;
+}
+.btn-secondary:hover {
+	background-color: #5a6268;
+}
+
+.btn-outline {
+	background-color: #fff;
+	color: #4a90e2;
+	border-color: #4a90e2;
+}
+.btn-outline:hover {
+	background-color: #4a90e2;
+	color: #fff;
+}
+
+.table-container {
+	background-color: #ffffff;
+	border-radius: 8px;
+	border: 1px solid #e0e0e0;
+	padding: 0;
+	overflow: hidden;
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+thead {
+	background-color: #f8f9fa;
+	border-bottom: 2px solid #e0e0e0;
+}
+
+th, td {
+	padding: 1rem;
+	text-align: center;
+	vertical-align: middle;
+}
+
+th {
+	font-weight: 600;
+	color: #495057;
+	font-size: 0.85rem;
+	text-transform: uppercase;
+}
+
+tbody tr:nth-child(odd) {
+	background-color: #fdfdfd;
+}
+
+tbody tr:hover {
+	background-color: #f1f6fc;
+}
+
+td {
+	font-size: 0.95rem;
+	color: #333;
+	border-top: 1px solid #e9ecef;
+}
+
+td:first-child {
+	font-weight: 500;
+}
+
+img {
+	border-radius: 50%;
+	width: 50px;
+	height: 50px;
+	object-fit: cover;
+	border: 2px solid #e9ecef;
+}
+
+td a {
+	font-weight: 500;
+	color: #4a90e2;
+	text-decoration: none;
+}
+
+td a:hover {
+	text-decoration: underline;
+}
+
+.empty-row td {
+	padding: 3rem 0;
+	font-size: 1rem;
+	color: #6c757d;
+	text-align: center;
+}
+.header-bottom {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 1rem 1.5rem;
+	background-color: #ffffff;
+	border: 1px solid #e0e0e0;
+	border-radius: 8px;
+}
+
+.table-footer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 1.5rem;
+	border-top: 1px solid #e0e0e0;
+}
+
+.page-navigation {
+	display: flex;
+	gap: 0.5rem;
+}
+
+.page-navigation-container {
+	flex: 1;
+	display: flex;
+	justify-content: center; 
+}
+
+
+
+.page-navigation a,
+.page-navigation span,
+.page-navigation strong {
+	display: inline-block;
+	min-width: 36px;
+	height: 36px;
+	line-height: 34px;
+	padding: 0 6px;
+	text-align: center;
+	font-size: 0.9rem;
+	font-weight: 500;
+	color: #4a90e2;
+	text-decoration: none;
+	border: 1px solid #e0e0e0;
+	border-radius: 5px;
+	background-color: #fff;
+	transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.page-navigation a:hover {
+	background-color: #f1f6fc;
+	border-color: #4a90e2;
+}
+
+.page-navigation strong {
+	background-color: #4a90e2;
+	border-color: #4a90e2;
+	color: #fff;
+	cursor: default;
+}
+
+.page-navigation .disabled {
+	color: #ced4da;
+	cursor: not-allowed;
+}
+
+.page-navigation .disabled:hover {
+	background-color: #fff;
+	border-color: #e0e0e0;
+}
+
+.form-search input[type="text"] {
+	height: 20px;
+}

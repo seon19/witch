@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>관리자 페이지</title>
+  <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" type="text/css">
+  <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/requestDetail.css}" type="text/css">
+  <style>
+    .reward-items { display:flex; gap:10px; flex-wrap:wrap; }
+    .reward-item {
+      width:72px; height:72px; background:#e9e9e9; border-radius:6px;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+    }
+    .reward-item img { max-width:48px; max-height:48px; image-rendering: pixelated; }
+    .reward-qty { margin-top:6px; font-size:12px; line-height:1; }
+  </style>
+</head>
+<body>
+<div class="main-container">
+  <div th:replace="~{/admin/menubar :: menubarFragment}"></div>
+
+  <div class="body-container">
+    <div class="title-container">
+      <span>의뢰 상세 정보</span>
+    </div>
+
+    <div class="detail-card">
+      <div class="card-header">
+        <h2 th:text="${req.requestName}">의뢰명</h2>
+      </div>
+
+      <div class="card-body">
+        <div class="detail-info">
+          <div class="info-item">
+            <span class="info-label">의뢰명</span>
+            <p class="info-value" th:text="${req.requestName}"></p>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">의뢰 내용</span>
+            <p th:text="${req.requestContent}" style="white-space: pre-line;"></p>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">의뢰 레벨</span>
+            <p class="info-value" th:text="${'Lv. ' + req.requestLevel}"></p>
+          </div>
+
+          <div class="info-item" th:if="${req.client != null}">
+            <span class="info-label">의뢰인</span>
+            <p class="info-value" th:text="${req.client}"></p>
+          </div>
+
+          <div class="info-item" th:if="${req.goalCount != null}">
+            <span class="info-label">요구 개수</span>
+            <p class="info-value" th:text="${#numbers.formatInteger(req.goalCount,0,'COMMA')} + '개'"></p>
+          </div>
+
+          <div class="info-item" th:if="${req.deadline != null}">
+            <span class="info-label">마감일</span>
+            <p class="info-value" th:text="${#temporals.format(req.deadline, 'yyyy-MM-dd HH:mm')}"></p>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">보상</span>
+            <div class="info-value">
+              <div>
+                <b>경험치</b> :
+                <span th:text="${#numbers.formatInteger(req.rewardExp, 0, 'COMMA')} + ' EXP'">0 EXP</span>
+              </div>
+              <div>
+                <b>골드</b> :
+                <span th:text="${#numbers.formatInteger(req.rewardGold, 0, 'COMMA')} + ' G'">0 G</span>
+              </div>
+
+              <div style="margin-top:8px;">
+                <b>아이템</b> :
+                <div class="reward-items">
+                  <div class="reward-item" th:each="ri : ${rewardItems}">
+                    <img th:src="@{/uploads/material/{img}(img=${ri.material.materialPhoto})}"
+                         th:alt="${ri.material.materialName}">
+                    <div class="reward-qty" th:text="${ri.qty} + '개'">1개</div>
+                  </div>
+                </div>
+
+                <div th:if="${#lists.isEmpty(rewardItems)}" style="color:#888;margin-top:6px;">
+                  아이템 보상 없음
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <div>
+          <button type="button" class="btn btn-primary"
+                  th:onclick="|location.href='@{/admin/request/{id}/update(id=${req.requestId})}'|">수정</button>
+
+          <form th:action="@{/admin/request/{id}/delete(id=${req.requestId})}"
+                method="post" style="display:inline;"
+                onsubmit="return confirm('삭제하시겠습니까?');">
+            <button type="submit" class="btn btn-danger">삭제</button>
+          </form>
+        </div>
+
+        <button type="button" class="btn btn-secondary"
+                th:onclick="|location.href='@{/admin/request/requestList}'|">목록으로</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
