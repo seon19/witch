@@ -1,5 +1,6 @@
 package com.sp.app.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -14,4 +15,9 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>{
 	  public Page<Inventory> findByMaterialIsNotNull(Pageable pageable);
 	  public Page<Inventory> findByPotionIsNotNull(Pageable pageable);
 	  public Optional<Member> findByMemberAndMaterial(Member member, Material material);
+	  
+	  public List<Inventory> findByMemberMemberId(Long memberId);
+	  public Page<Inventory> findByMemberMemberId(Long memberId, Pageable pageable);
+	  public Page<Inventory> findByMemberMemberIdAndMaterialIsNotNull(Long memberId, Pageable pageable);
+	  public Page<Inventory> findByMemberMemberIdAndPotionIsNotNull(Long memberId, Pageable pageable);
 }
