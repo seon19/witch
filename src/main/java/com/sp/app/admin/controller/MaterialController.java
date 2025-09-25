@@ -94,9 +94,17 @@ public class MaterialController {
 	}
 	
 	@GetMapping("write")
-	public String writeForm(Model model) throws Exception {
+	public String writeForm(Model model, HttpSession session) throws Exception {
 		
-		model.addAttribute("mode", "write");
+		try {
+			SessionInfo loginUser = (SessionInfo) session.getAttribute("loginUser");
+		
+			model.addAttribute("loginUser", loginUser);
+			model.addAttribute("mode", "write");
+			
+		} catch (Exception e) {
+			log.info("writeForm: ", e);
+		}
 		
 		return "admin/material/materialWrite";
 	}
@@ -118,11 +126,13 @@ public class MaterialController {
 	public String materialDetail(@PathVariable("materialId") long materialId, @RequestParam(name = "page") int page,
 			@RequestParam(name = "schType", defaultValue = "all") String schType,
 			@RequestParam(name = "kwd", defaultValue = "") String kwd,
-			Model model) throws Exception {
+			Model model, HttpSession session) throws Exception {
 		
 		String query = "page=" + page;
 		
 		try {
+			SessionInfo loginUser = (SessionInfo) session.getAttribute("loginUser");
+			
 			kwd = myUtil.decodeUrl(kwd);
 			
 			if(! kwd.isBlank()) {
@@ -131,6 +141,7 @@ public class MaterialController {
 			
 			Material dto = Objects.requireNonNull(service.findById(materialId));
 			
+			model.addAttribute("loginUser", loginUser);
 			model.addAttribute("dto", dto);
 			model.addAttribute("page", page);
 			model.addAttribute("query", query);
@@ -151,13 +162,14 @@ public class MaterialController {
 	@GetMapping("update/{materialId}")
 	public String materialUpdateForm(@PathVariable("materialId") long materialId,
 			@RequestParam(name = "page") String page,
-			Model model) throws Exception {
+			Model model, HttpSession session) throws Exception {
 
 		try {
+			SessionInfo loginUser = (SessionInfo) session.getAttribute("loginUser");
+			
 			Material dto = Objects.requireNonNull(service.findById(materialId));
 
-		
-			
+			model.addAttribute("loginUser", loginUser);
 			model.addAttribute("mode", "update");
 			model.addAttribute("page", page);
 			model.addAttribute("dto", dto);

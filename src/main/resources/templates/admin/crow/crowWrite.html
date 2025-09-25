@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>관리자 페이지</title>
+<link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" type="text/css">
+<link rel="stylesheet" th:href="@{/dist/css/cssAdmin/materialWrite.css}" type="text/css">
+
+<style type="text/css">
+.form-buttons {
+	padding-top: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="main-container">
+	<div th:replace="~{/admin/menubar :: menubarFragment}"></div>
+	<div class="body-container">
+		<div class="title-container">
+			<span th:text="${mode=='write'?'이벤트 등록':'이벤트 수정'}"></span>
+		</div>
+		
+		<div class="table-container">
+			<form th:action="@{/admin/crow/{mode}(mode=${mode})}" name="crowForm" method="post">
+				<input type="hidden" name="crowEventId" th:if="${mode=='update'}" th:value="${dto.crowEventId}">
+				<input type="hidden" name="page" th:if="${mode=='update'}" th:value="${page}">
+
+				<table>
+					<tr>
+						<td>이벤트 이름</td>
+						<td><input type="text" name="eventName" class="form-control" th:value="${dto?.eventName}"></td>
+					</tr>
+					<tr>
+						<td>이벤트 시작 시간</td>
+						<td><input type="date" name="eventStartTime" class="form-control" th:value="${dto?.eventStartTime != null ? #temporals.format(dto.eventStartTime, 'yyyy-MM-dd') : ''}"></td>
+					</tr>
+					<tr>
+						<td>이벤트 종료 시간</td>
+						<td><input type="date" name="eventEndTime" class="form-control" th:value="${dto?.eventEndTime != null ? #temporals.format(dto.eventEndTime, 'yyyy-MM-dd') : ''}"></td>
+					</tr>
+					<tr>
+						<td>까마귀 출현 조건</td>
+						<td><input type="text" name="crowSpawnCondition" class="form-control" th:value="${dto?.crowSpawnCondition}"></td>
+					</tr>
+				</table>
+
+				<h3 style="padding: 1.5rem 1rem 0;">이벤트 내용</h3>
+
+				<table>
+					<tr class="trade-section">
+						<td>거래 아이템</td>
+						<td>
+							<select name="giveMaterial.materialId">
+								<option value="">-- 주는 재료 --</option>
+								<option th:each="m : ${materialList}" th:value="${m.materialId}" th:text="${m.materialName}"
+									th:selected="${dto?.giveMaterial?.materialId == m.materialId}"></option>
+							</select>
+							<input type="number" name="giveQuantity" placeholder="수량" style="width: 80px;" th:value="${dto?.giveQuantity}"> 개
+							<span style="margin: 0 10px;">→</span>
+							<select name="receiveMaterial.materialId">
+								<option value="">-- 받는 재료 --</option>
+								<option th:each="m : ${materialList}" th:value="${m.materialId}" th:text="${m.materialName}"
+									th:selected="${dto?.receiveMaterial?.materialId == m.materialId}"></option>
+							</select>
+							<input type="number" name="receiveQuantity" placeholder="수량" style="width: 80px;" th:value="${dto?.receiveQuantity}"> 개
+						</td>
+					</tr>
+					<tr class="sale-section">
+						<td>판매 아이템</td>
+						<td>
+							<select name="saleMaterial.materialId">
+								<option value="">-- 판매 재료 --</option>
+								<option th:each="m : ${materialList}" th:value="${m.materialId}" th:text="${m.materialName}"
+									th:selected="${dto?.saleMaterial?.materialId == m.materialId}"></option>
+							</select>
+							<input type="number" name="saleQuantity" placeholder="재고" style="width: 80px;" th:value="${dto?.saleQuantity}"> 개
+							<input type="number" name="salePrice" placeholder="개당 가격" style="width: 120px;" th:value="${dto?.salePrice}"> 원
+						</td>
+					</tr>
+					<tr>
+						<td>이벤트 상태</td>
+						<td>
+							<label><input type="radio" name="eventstatus" value="1" th:checked="${dto == null or dto.eventstatus == 1}"> 활성</label>
+							<label style="margin-left: 10px;"><input type="radio" name="eventstatus" value="0" th:checked="${dto != null and dto.eventstatus == 0}"> 비활성</label>
+						</td>
+					</tr>
+				</table>
+
+				<div class="form-buttons">
+				    <button type="submit" class="btn btn-primary" th:text="${mode=='write'?'등록 완료':'수정 완료'}"></button>
+				    <a th:href="@{/admin/crow/crowList}" class="btn btn-secondary" th:text="${mode=='write'?'등록 취소':'수정 취소'}"></a>
+				</div>
+			</form>
+		</div>		
+	</div>
+</div>
+</body>
+</html>

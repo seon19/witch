@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
-<title>관리자 페이지 - 상점 상품 등록</title>
+<title>관리자 페이지</title>
 
 <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" type="text/css">
 <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/materialWrite.css}" type="text/css">
@@ -24,20 +24,21 @@
 					<tr>
 						<td>재료 선택</td>
 						<td>
-							<select name="materialId" id="materialSelect">
-								<option value="">--- 재료를 선택하세요 ---</option>
-								<th:block th:each="m : ${materialList}">
-									<option th:value="${m.materialId}" 
-											th:text="${m.materialName}" 
-											th:selected="${dto != null and dto.material.materialId == m.materialId}"
-											th:disabled="${registeredMaterialIds != null and registeredMaterialIds.contains(m.materialId)}"></option>
-								</th:block>
+							<select name="materialId_display" id="materialSelect" th:disabled="${mode == 'saleUpdate'}">
+							    <option value="">--- 재료를 선택하세요 ---</option>
+							    <th:block th:each="m : ${materialList}">
+							        <option th:value="${m.materialId}" 
+							                th:text="${m.materialName}" 
+							                th:selected="${dto != null and dto.material.materialId == m.materialId}"
+							                th:disabled="${registeredMaterialIds != null and registeredMaterialIds.contains(m.materialId) and (dto == null or dto.material.materialId != m.materialId)}"></option>
+							    </th:block>
 							</select>
+							<input type="hidden" name="materialId" th:if="${mode == 'saleUpdate'}" th:value="${dto.material.materialId}">
 						</td>
 					</tr>
 				</table>
 
-				<div id="material-info-area" th:style="${mode=='update' ? 'display:block;' : 'display:none;'}">
+				<div id="material-info-area" th:style="${mode=='saleUpdate' ? 'display:block;' : 'display:none;'}">
 					<h3 style="padding: 1rem 1rem 0;">선택된 재료 정보</h3>
 					<table>
 						<tr>
@@ -46,15 +47,15 @@
 						</tr>
 						<tr>
 							<td>재료 설명</td>
-							<td id="preview-description" th:text="${dto?.material.materialDescription}"></td>
+							<td id="preview-description" th:text="${dto != null ? dto.material.materialDescription : ''}"></td>
 						</tr>
 						<tr>
 							<td>재료 효과</td>
-							<td id="preview-effect" th:text="${dto?.material.materialEffect}"></td>
+							<td id="preview-effect" th:text="${dto != null ? dto.material.materialEffect : ''}"></td>
 						</tr>
 						<tr>
 							<td>재료 레벨</td>
-							<td id="preview-level" th:text="${dto?.material.materialLevel}"></td>
+							<td id="preview-level" th:text="${dto != null ? dto.material.materialLevel : ''}"></td>
 						</tr>
 						<tr>
 							<td>기존 가격</td>
@@ -68,7 +69,7 @@
 					 <tr>
 						<td>판매 가격</td>
 						<td><input type="text" name="sellingPrice" placeholder="판매 가격을 숫자로 입력하세요." class="form-control"
-								   th:value="${dto?.sellingPrice}"></td>
+								   th:value="${dto != null ? dto.sellingPrice : ''}"></td>
 					</tr>
 					<tr>
 						<td>판매 여부</td>
@@ -79,12 +80,12 @@
 					</tr>
 				</table>
 				
-				<th:block th:if="${mode=='update'}">
+				<th:block th:if="${mode=='saleUpdate'}">
 					<input type="hidden" name="shopId" th:value="${dto.shopId}">
 					<input type="hidden" name="page" th:value="${page}">
 				</th:block>
 
-				<div class="form-buttons">
+				<div class="form-buttons" style="margin-top: 20px;">
 				    <button type="button" class="btn btn-primary" onclick="sendOk();" th:text="${mode=='saleWrite'?'등록 완료':'수정 완료'}"></button>
 				    <button type="button" class="btn btn-secondary" th:onclick="|location.href='@{/admin/orders/saleList}'|" th:text="${mode=='saleWrite'?'등록 취소':'수정 취소'}"></button>
 				</div>

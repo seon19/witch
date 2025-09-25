@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>관리자 페이지</title>
+<link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" type="text/css">
+<link rel="stylesheet" th:href="@{/dist/css/cssAdmin/materialDetail.css}" type="text/css">
+</head>
+<body>
+
+<div class="main-container">
+	<div th:replace="~{/admin/menubar :: menubarFragment}"></div>
+
+	<div class="body-container">
+	
+		<div class="title-container">
+			<span>까마귀 이벤트 상세 정보</span>
+		</div>
+		
+		<div class="detail-card">
+			<div class="card-header">
+				<h2 th:text="${dto.eventName}"></h2>
+			</div>
+		
+			<div class="card-body">
+				<div class="detail-info" style="flex: 1;">
+					<div class="info-item">
+						<span class="info-label">이벤트 기간</span>
+						<p class="info-value" th:text="${#temporals.format(dto.eventStartTime, 'yyyy-MM-dd HH:mm')} + ' ~ ' + ${#temporals.format(dto.eventEndTime, 'yyyy-MM-dd HH:mm')}"></p>
+					</div>
+					<div class="info-item">
+						<span class="info-label">출현 조건</span>
+						<p class="info-value" th:text="${dto.crowSpawnCondition}"></p>
+					</div>
+					<div class="info-item">
+						<span class="info-label">상태</span>
+						<p class="info-value" th:text="${dto.eventstatus == 1 ? '활성' : '비활성'}"></p>
+					</div>
+
+					<div class="info-item-group" th:if="${dto.giveMaterial != null}">
+						<div class="info-item">
+							<span class="info-label">교환 조건 (플레이어 → 까마귀)</span>
+							<p class="info-value" th:text="${dto.giveMaterial.materialName} + ' ' + ${dto.giveQuantity} + '개'"></p>
+						</div>
+						<div class="info-item">
+							<span class="info-label">교환 보상 (까마귀 → 플레이어)</span>
+							<p class="info-value" th:text="${dto.receiveMaterial.materialName} + ' ' + ${dto.receiveQuantity} + '개'"></p>
+						</div>
+					</div>
+
+					<div class="info-item-group" th:if="${dto.saleMaterial != null}">
+						<div class="info-item">
+							<span class="info-label">판매 아이템</span>
+							<p class="info-value" th:text="${dto.saleMaterial.materialName}"></p>
+						</div>
+						<div class="info-item">
+							<span class="info-label">판매 재고</span>
+							<p class="info-value" th:text="${dto.saleQuantity} + '개'"></p>
+						</div>
+						<div class="info-item">
+							<span class="info-label">개당 가격</span>
+							<p class="info-value" th:text="${#numbers.formatInteger(dto.salePrice, 0, 'COMMA')} + '원'"></p>
+						</div>
+					</div>
+				</div>
+			</div>
+		
+			<div class="card-footer">
+				<div>
+					<a class="btn btn-primary" th:href="@{/admin/crow/update/{id}(id=${dto.crowEventId}, page=${page})}">수정</a>
+					<button type="button" class="btn btn-danger" th:onclick="deleteOk()">삭제</button>
+				</div>
+				<a class="btn btn-secondary" th:href="@{/admin/crow/crowList(page=${page})}">목록으로</a>
+			</div>
+		</div>
+
+		<form id="deleteForm" th:action="@{/admin/crow/delete/{id}(id=${dto.crowEventId})}" method="post">
+			<input type="hidden" name="page" th:value="${page}">
+		</form>
+		
+	</div>
+</div>
+
+<script type="text/javascript">
+function deleteOk() {
+	if(confirm('이벤트를 삭제 하시겠습니까?')) {
+		document.getElementById('deleteForm').submit();
+	}
+}
+</script>
+
+</body>
+</html>

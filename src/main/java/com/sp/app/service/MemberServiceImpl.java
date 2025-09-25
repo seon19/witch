@@ -1,6 +1,7 @@
 package com.sp.app.service;
 
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -28,4 +29,21 @@ public class MemberServiceImpl implements MemberService {
         Optional<Member> result = memberRepository.findByUserIdAndPassword(userId, password);
         return result.orElse(null);
     }
+
+	@Override
+	public Member findById(long memberId) {
+		Member dto = null;
+				
+		try {
+			Optional<Member> member = memberRepository.findById(memberId);
+			dto  = member.get();
+			
+		} catch (NoSuchElementException  e) {
+		} catch (Exception e) {
+			log.info("findById", e);
+		}
+		
+		return dto;
+	}
+	
 }

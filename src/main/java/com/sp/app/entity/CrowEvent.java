@@ -1,6 +1,6 @@
 package com.sp.app.entity;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,10 +29,10 @@ public class CrowEvent {
     private String eventName;
 
     @Column(name = "eventstarttime", nullable = false)
-    private LocalDateTime eventStartTime;
+    private LocalDate eventStartTime;
 
     @Column(name = "eventendtime", nullable = false)
-    private LocalDateTime eventEndTime;
+    private LocalDate eventEndTime;
 
     @Column(name = "crowspawncondition", nullable = false, length = 100)
     private String crowSpawnCondition;
@@ -53,15 +53,15 @@ public class CrowEvent {
     private Integer salePrice;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "givematerialid", nullable = false)
+    @JoinColumn(name = "givematerialid")
     private Material giveMaterial;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "receivematerialid", nullable = false)
+    @JoinColumn(name = "receivematerialid")
     private Material receiveMaterial;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "salematerialid", nullable = false)
+    @JoinColumn(name = "salematerialid")
     private Material saleMaterial;
 }
 

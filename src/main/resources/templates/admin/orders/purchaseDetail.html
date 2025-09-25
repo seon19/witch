@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>관리자 페이지</title>
+
+<link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" type="text/css">
+<link rel="stylesheet" th:href="@{/dist/css/cssAdmin/materialDetail.css}" type="text/css">
+<style>
+    .status-true { color: #28a745; font-weight: 600; }
+    .status-false { color: #6c757d; }
+</style>
+</head>
+<body>
+
+<div class="main-container">
+	<div th:replace="~{/admin/menubar :: menubarFragment}"></div>
+
+	<div class="body-container">
+	
+		<div class="title-container">
+			<span>구매 아이템 상세 정보</span>
+		</div>
+		
+		<div class="detail-card">
+			<div class="card-header">
+				<h2 th:if="${dto.material != null}" th:text="${dto.material.materialName}"></h2>
+				<h2 th:if="${dto.potion != null}" th:text="${dto.potion.potionName}"></h2>
+			</div>
+		
+			<div class="card-body">
+				<div class="detail-image-wrapper">
+					<img th:if="${dto.material != null}" th:src="@{/uploads/material/{imageName}(imageName=${dto.material.materialPhoto})}">
+					<img th:if="${dto.potion != null}" th:src="@{/uploads/potion/{imageName}(imageName=${dto.potion.potionPhoto})}">
+				</div>
+				<div class="detail-info">
+
+					<th:block th:if="${dto.material != null}">
+						<div class="info-item">
+							<span class="info-label">재료 효과</span>
+							<p class="info-value" th:text="${dto.material.materialEffect}"></p>
+						</div>
+						<div class="info-item">
+							<span class="info-label">재료 설명</span>
+							<p class="info-value" th:text="${dto.material.materialDescription}"></p>
+						</div>
+						<div class="info-item">
+							<span class="info-label">원본 가격</span>
+							<p class="info-value" th:text="${#numbers.formatInteger(dto.material.materialPrice, 3, 'COMMA') + '원'}"></p>
+						</div>
+					</th:block>
+					
+					<th:block th:if="${dto.potion != null}">
+						<div class="info-item">
+							<span class="info-label">포션 설명</span>
+							<p class="info-value" th:text="${dto.potion.potionDescription}"></p>
+						</div>
+						<div class="info-item">
+							<span class="info-label">조합법</span>
+							<p class="info-value" th:text="${dto.potion.firstMaterial.materialName} + ' + ' + ${dto.potion.secondMaterial.materialName}"></p>
+						</div>
+					</th:block>
+
+					<div class="info-item-group">
+						<div class="info-item">
+							<span class="info-label">구매 가격</span>
+							<p class="info-value" th:text="${#numbers.formatInteger(dto.purchasePrice, 3, 'COMMA') + '원'}"></p>
+						</div>
+						<div class="info-item">
+							<span class="info-label">구매 가능 여부</span>
+							<p class="info-value">
+	                            <span th:text="${dto.isAvailable ? '구매 가능' : '구매 중지'}"
+	                                  th:classappend="${dto.isAvailable ? 'status-true' : 'status-false'}"></span>
+	                        </p>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		
+			<div class="card-footer">
+				<div>
+					<button type="button" class="btn btn-primary" th:onclick="|location.href='@{/admin/orders/purchaseUpdate/{purchaseId}(purchaseId=${dto.purchaseId}, page=${page})}'|">수정</button>
+					<button type="button" class="btn btn-danger" th:onclick="deleteOk()">삭제</button>
+				</div>
+				<button type="button" class="btn btn-secondary" th:onclick="|location.href='@{/admin/orders/purchaseList(page=${page})}'|">목록으로</button>
+			</div>
+		</div>
+
+		<form id="deleteForm" th:action="@{/admin/orders/purchaseDelete/{purchaseId}(purchaseId=${dto.purchaseId})}" method="post">
+			<input type="hidden" name="page" th:value="${page}">
+		</form>
+		
+	</div>
+</div>
+
+<script type="text/javascript">
+function deleteOk() {
+	if(confirm('해당 아이템을 삭제 하시겠습니까?')) {
+		document.getElementById('deleteForm').submit();
+	}
+}
+</script>
+
+</body>
+</html>

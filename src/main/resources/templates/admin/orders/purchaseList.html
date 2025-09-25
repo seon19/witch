@@ -6,6 +6,16 @@
 
 <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" type="text/css">
 <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/materialList.css}" type="text/css">
+<style type="text/css">
+.status-true {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.status-false {
+    color: #6c757d;
+}
+</style>
 </head>
 <body>
 
@@ -26,14 +36,14 @@
 				<div>
 					<form name="searchForm" class="form-search">
 						<select name="schType">
-							<option value="name" th:selected="${schType} == 'name'">품목 이름</option>
+							<option value="name" th:selected="${schType} == 'materialName'">품목 이름</option>
 						</select>
 						<input type="text" name="kwd" th:value="${kwd}">
 						<button type="button" class="btn-default" onclick="searchList()">검색</button>
 					</form>
 				</div>
 				<div>
-					<button type="button" th:onclick="|location.href='@{/admin/orders/write}'|">구매 품목 추가</button>
+					<button type="button" th:onclick="|location.href='@{/admin/orders/purchaseWrite}'|">구매 품목 추가</button>
 				</div>
 			</div>
 		</header>
@@ -44,38 +54,51 @@
 		</div>
 		<div class="table-container">
 			<table>
-				<thead>
-					<tr>
-						<th>번호</th>
-						<th>재료 이미지</th>
-						<th>재료 이름</th>
-						<th>재료 가격</th>
-						<th>재료 레벨</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr th:each="dto, status: ${list}">
-						<td th:text="${dataCount-(page-1)*size-status.index}"></td>
-						<td>
-							<img th:src="@{/uploads/material/{imageName}(imageName=${dto.materialPhoto})}" width="80" height="80" style="object-fit: cover;">
-						</td>
-						<td>
-						    <a th:href="@{/admin/material/materialDetail/{materialId}(materialId=${dto.materialId}, page=${page}, schType=${schType}, kwd=${kwd})}" th:text="${dto.materialName}"></a>
-						</td>
-						<td th:text="${dto.materialPrice}"></td>
-						<td th:text="${dto.materialLevel}"></td>
-					</tr>
-					<tr th:if="${#lists.isEmpty(list)}" class="empty-row">
-						<td colspan="5">등록된 재료가 없습니다.</td>
-					</tr>
-				</tbody>
-			</table>
+			<thead>
+				<tr>
+					<th>번호</th>
+					<th>품목 이미지</th>
+					<th>품목 이름</th>
+					<th>원본 가격</th> <th>구매 가격</th>
+					<th>구매 가능 여부</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="dto, status: ${list}">
+					<td th:text="${dataCount-(page-1)*size-status.index}"></td>
+					<td>
+						<img th:if="${dto.material != null}" th:src="@{/uploads/material/{imageName}(imageName=${dto.material.materialPhoto})}" width="80" height="80" style="object-fit: cover;">
+						<img th:if="${dto.potion != null}" th:src="@{/uploads/potion/{imageName}(imageName=${dto.potion.potionPhoto})}" width="80" height="80" style="object-fit: cover;">
+					</td>
+					<td>
+						<a th:href="@{/admin/orders/purchaseDetail/{purchaseId}(purchaseId=${dto.purchaseId}, page=${page})}">
+							<span th:if="${dto.material != null}" th:text="${dto.material.materialName}"></span>
+							<span th:if="${dto.potion != null}" th:text="${dto.potion.potionName}"></span>
+						</a>
+					</td>
+		
+					<td>
+						<span th:if="${dto.material != null}" th:text="${#numbers.formatInteger(dto.material.materialPrice, 3, 'COMMA') + '원'}"></span>
+						<span th:if="${dto.potion != null}">-</span>
+					</td>
+					
+					<td th:text="${#numbers.formatInteger(dto.purchasePrice, 3, 'COMMA') + '원'}"></td>
+					<td>
+						<span th:text="${dto.isAvailable ? '구매가능' : '구매중지'}"
+							  th:classappend="${dto.isAvailable ? 'status-true' : 'status-false'}"></span>
+					</td>
+				</tr>
+				<tr th:if="${#lists.isEmpty(list)}" class="empty-row">
+					<td colspan="6">등록된 구매 가능 아이템이 없습니다.</td>
+				</tr>
+			</tbody>
+		</table>
 			
 			<div class="table-footer">
 				<div class="page-navigation"></div>
 						
 				<div>
-					<button type="button" class="btn btn-outline" th:onclick="|location.href='@{/admin/material/materialList}'|">새로고침</button>
+					<button type="button" class="btn btn-outline" th:onclick="|location.href='@{/admin/orders/purchaseList}'|">새로고침</button>
 				</div>
 			</div>
 		</div>
@@ -89,11 +112,11 @@ window.addEventListener('DOMContentLoaded', function() {
 	let page = '[[${page}]]';
 	let pageSize = '[[${size}]]';
 	let dataCount = parseInt('[[${dataCount}]]') || 0;
-	let url = '[[@{/admin/material/materialList}]]';
+	let url = '[[@{/admin/orders/saleList}]]';
 	let search = '[[${not #strings.isEmpty(kwd)}]]';
 	
 	if(search === 'true') {
-		url = '[[@{/admin/material/materialList(schType=${schType}, kwd=${kwd})}]]';
+		url = '[[@{/admin/orders/saleList(schType=${schType}, kwd=${kwd})}]]';
 	}
 	
 	let total_page = pageCount(dataCount, pageSize);
@@ -123,7 +146,7 @@ function searchList() {
 	const formData = new FormData(f);
 	let params = new URLSearchParams(formData).toString();
 	
-	let url = '[[@{/admin/material/materialList}]]';
+	let url = '[[@{/admin/orders/saleList}]]';
 	location.href = url + '?' + params;
 }
 

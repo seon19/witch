@@ -34,4 +34,11 @@ public class DailyReward {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memberid", nullable = false)
     private Member member;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "materialid")
+    private Material material;
+    
+    @Column(name = "quantity")
+    private Integer quantity = 1;
 }

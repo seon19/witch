@@ -8,4 +8,6 @@ public interface MemberService {
 	
 	public Member loginMember(Map<String, Object> map);
 
+	public Member findById(long memberId);
+
 }

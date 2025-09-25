@@ -10,14 +10,181 @@
 <body>
 
 <div class="main-container">
-
+	<div class="title-container">
+		<span class="logo" th:onclick="|location.href='@{/main/home}'|">위치 크래프트</span>
+		<button th:onclick="|location.href='@{/member/logout}'|">로그아웃</button>
+	</div>
 
 	<div class="page-container">
 		<button th:onclick="|location.href='@{/orders/purchaseList}'|">구매</button>
 		<button th:onclick="|location.href='@{/orders/saleList}'|">판매</button>
 	</div>
+	
+	<div class="grid">
+		<div class="wallet-container" th:if="${loginUser != null}">
+	        <div class="balance-display">
+	            <span th:text="${#numbers.formatInteger(loginUser.currentBalance, 0, 'COMMA')}"></span>
+	        </div>
+	    </div>
+	
+		<div class="grid-container" th:if="${not #lists.isEmpty(list)}">
+    
+    	<div class="item-card" th:each="dto : ${list}">
+		    <div class="item-card-content" th:if="${dto.material != null}"
+		         th:attr="data-id=${dto.shopId}, 
+		                  data-name=${dto.material.materialName},
+		                  data-price=${dto.sellingPrice},
+		                  data-photo=@{/uploads/material/{imageName}(imageName=${dto.material.materialPhoto})},
+		                  data-description=${dto.material.materialDescription}">
+		        
+		        <div class="card-image-wrapper">
+		            <img th:src="@{/uploads/material/{imageName}(imageName=${dto.material.materialPhoto})}" 
+		                 alt="재료 이미지">
+		        </div>
+		        <div class="card-info">
+		            <div class="item-name" th:text="${dto.material.materialName}"></div>
+		            <div class="item-price" th:text="${#numbers.formatInteger(dto.sellingPrice, 0, 'COMMA') + ' 원'}"></div>
+		        </div>
+		    </div>
+		</div>
+	    
+	
+		</div>
+	
+	<div class="noList" th:if="${#lists.isEmpty(list)}">
+	    <p>판매 중인 상품이 없습니다.</p>
+	</div>
+
+		<div class="page-navigation"></div>
+
+	</div>
 
 </div>
 
+
+<div id="itemModal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <img id="modal-img" src="" alt="상품 이미지" class="modal-item-image">
+        <h2 id="modal-item-name">상품 이름</h2>
+        <p id="modal-item-description">상품 설명</p>
+        
+        <div class="quantity-selector">
+            <button id="minus-btn">-</button>
+            <input type="number" id="quantity-input" value="1" min="1" readonly>
+            <button id="plus-btn">+</button>
+        </div>
+        
+        <div class="total-price-wrapper">
+            <span>총액: </span>
+            <span id="modal-total-price">가격</span>
+            <span>원</span>
+        </div>
+        
+        <button id="modal-buy-button" class="buy-button">구매하기</button>
+    </div>
+</div>
+
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function () {
+    const modal = document.getElementById('itemModal');
+    const closeButton = document.querySelector('.close-button');
+
+    const modalImg = document.getElementById('modal-img');
+    const modalItemName = document.getElementById('modal-item-name');
+    const modalItemDesc = document.getElementById('modal-item-description');
+    
+    const minusBtn = document.getElementById('minus-btn');
+    const plusBtn = document.getElementById('plus-btn');
+    const quantityInput = document.getElementById('quantity-input');
+    const modalTotalPrice = document.getElementById('modal-total-price');
+    const modalBuyButton = document.getElementById('modal-buy-button');
+
+    const itemCards = document.querySelectorAll('.item-card-content');
+    let currentShopId = null;
+    let basePrice = 0;
+
+    function formatNumber(num) {
+        return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+    }
+
+    function updateTotalPrice() {
+        const quantity = parseInt(quantityInput.value);
+        const totalPrice = basePrice * quantity;
+        modalTotalPrice.textContent = formatNumber(totalPrice);
+    }
+
+    itemCards.forEach(card => {
+        card.addEventListener('click', function () {
+            const dataset = this.dataset;
+
+            currentShopId = dataset.id;
+            basePrice = parseInt(dataset.price.replace(/,/g, ''));
+
+            modalImg.src = dataset.photo;
+            modalItemName.textContent = dataset.name;
+            modalItemDesc.textContent = dataset.description;
+            
+            quantityInput.value = 1;
+            updateTotalPrice();
+
+            modal.style.display = 'flex';
+        });
+    });
+    
+    plusBtn.addEventListener('click', () => {
+        quantityInput.value = parseInt(quantityInput.value) + 1;
+        updateTotalPrice();
+    });
+
+    minusBtn.addEventListener('click', () => {
+        let quantity = parseInt(quantityInput.value);
+        if (quantity > 1) {
+            quantityInput.value = quantity - 1;
+            updateTotalPrice();
+        }
+    });
+
+    modalBuyButton.addEventListener('click', function() {
+        const quantity = parseInt(quantityInput.value);
+
+        fetch('/orders/purchase', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                shopId: currentShopId,
+                quantity: quantity
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                window.location.reload(); // 성공 시 페이지 새로고침
+            } else {
+                alert('구매 실패: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('구매 처리 중 오류:', error);
+            alert('구매 처리 중 오류가 발생했습니다.');
+        });
+    });
+
+    function closeModal() {
+        modal.style.display = 'none';
+    }
+
+    closeButton.addEventListener('click', closeModal);
+
+    modal.addEventListener('click', function (event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+});
+</script>
 </body>
 </html>

@@ -92,6 +92,14 @@ import lombok.extern.slf4j.Slf4j;
 	    }
 		
 	    
-	    
+	    @GetMapping("logout")
+		public String logout(HttpSession session) {
+
+			session.removeAttribute("loginUser");
+
+			session.invalidate();
+
+			return "redirect:/member/login";
+		}
 	
 	}

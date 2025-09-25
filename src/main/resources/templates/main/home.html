@@ -12,8 +12,8 @@
 <div class="main-container">
 	
 	<div class="title-container">
-		<span class="logo">위치 크래프트</span>
-		<button th:onclick="|location.href='@{/member/login}'|">로그아웃</button>
+		<span class="logo" th:onclick="|location.href='@{/main/home}'|">위치 크래프트</span>
+		<button th:onclick="|location.href='@{/member/logout}'|">로그아웃</button>
 	</div>
 	
 	<div class="menu-container">
@@ -21,7 +21,25 @@
 		<button th:onclick="|location.href='@{}'|">공지사항</button>
 		<button th:onclick="|location.href='@{}'|">자유게시판</button>
 	</div>
-
+	
+	<div class="left-page">
+	    <img th:src="@{/dist/images/바구니4.png}"
+	         class="left-size"
+	         th:classappend="${loginUser != null and !hasReceivedToday} ? 'pulsing-basket' : ''"
+	         onclick="openDailyRewardModal()" 
+	         style="cursor: pointer;">
+	</div>
+	
+	<div class="right-page">
+	    <div class="wallet-container" th:if="${loginUser != null}">
+	        <span class="nickname" th:text="${loginUser.nickname}">사용자닉네임</span><span>님의 지갑</span>
+	        <div class="balance-display">
+	            <img th:src="@{/dist/images/coin.png}" alt="코인">
+	            <span th:text="${#numbers.formatInteger(loginUser.currentBalance, 0, 'COMMA')}">1,000</span>
+	        </div>
+	    </div>
+	</div>
+	
 	<div class="button-container">
 		<button th:onclick="|location.href='@{/work/workroom}'|">공방</button>
 		<button class="spBtn2" th:onclick="|location.href='@{/work/recipe}'|">레시피북</button>
@@ -31,5 +49,89 @@
 
 </div>
 
+<div id="dailyRewardModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeDailyRewardModal()">&times;</span>
+        <div class="modal-header">
+            <h2>일일 보상</h2>
+        </div>
+        <div class="modal-body">
+            <div id="rewardContent">
+                <div class="loading">보상 확인 중...</div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeDailyRewardModal()">확인</button>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+function openDailyRewardModal() {
+    const modal = document.getElementById('dailyRewardModal');
+    modal.style.display = 'flex';
+    
+    fetch('/main/dailyReward')
+        .then(response => response.json())
+        .then(data => {
+    const rewardContent = document.getElementById('rewardContent');
+    
+    if(data.error) {
+        rewardContent.innerHTML = `<div class="error"><p>${data.error}</p></div>`;
+        return;
+    }
+
+
+    const imagePath = `/uploads/material/${data.materialPhoto}`;
+
+    if (data.alreadyReceived) {
+        // 이미 받은 경우
+        rewardContent.innerHTML = `
+            <div class="reward-already">
+                <p>오늘 이미 보상을 받으셨습니다!</p>
+                <div class="received-item">
+                    <span class="material-name">${data.materialName} x${data.quantity}</span>
+                </div>
+                <p class="next-reward">내일 다시 방문해 주세요!</p>
+            </div>
+        `;
+    } else {
+        // 새로 받는 경우
+        rewardContent.innerHTML = `
+            <div class="reward-new">
+                <p class="reward-text">축하합니다! 새로운 재료를 획득했습니다!</p>
+                <div class="new-item">
+                    <span class="material-name">${data.materialName} x${data.quantity}</span>
+                </div>
+                <div class="consecutive-days">
+                    <span>연속 접속: ${data.consecutiveDays}일</span>
+                </div>
+            </div>
+        `;
+    }
+})
+        .catch(error => {
+            console.error('일일보상 조회 오류:', error);
+            document.getElementById('rewardContent').innerHTML = `
+                <div class="error">
+                    <p>보상 정보를 불러오는데 실패했습니다.</p>
+                    <p>잠시 후 다시 시도해 주세요.</p>
+                </div>
+            `;
+        });
+}
+
+function closeDailyRewardModal() {
+    document.getElementById('dailyRewardModal').style.display = 'none';
+}
+
+// 모달 외부 클릭시 닫기
+window.onclick = function(event) {
+    const modal = document.getElementById('dailyRewardModal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
+    }
+}
+</script>
 </body>
 </html>

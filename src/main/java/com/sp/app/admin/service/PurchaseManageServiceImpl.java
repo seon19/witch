@@ -10,8 +10,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sp.app.entity.Shop;
-import com.sp.app.repository.ShopRepository;
+import com.sp.app.entity.Purchase;
+import com.sp.app.repository.PurchaseRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,32 +20,32 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ShopManageServiceImpl implements ShopManageService {
+public class PurchaseManageServiceImpl implements PurchaseManageService {
 
-	// 판매 품목 서비스
+	// 구매 품목 서비스
 	
-	private final ShopRepository shopRepository;
+	private final PurchaseRepository purchaseRepository;
 	
 	@Value("${file.upload-path.root}")
 	private String uploadPathRoot;
 
 	@Override
-	public List<Shop> listAll() {
-		List<Shop> list = shopRepository.findAll();
+	public List<Purchase> listAll() {
+		List<Purchase> list = purchaseRepository.findAllWithDetails();
 		return list;
 	}
 
 	@Override
-	public Page<Shop> listPage(String schType, String kwd, int current_page, int size) {
-		Page<Shop> p = null;
+	public Page<Purchase> listPage(String schType, String kwd, int current_page, int size) {
+		Page<Purchase> p = null;
 		
 		try {
-			Pageable pageable = PageRequest.of(current_page -1, size, Sort.by(Sort.Direction.DESC, "shopId"));
+			Pageable pageable = PageRequest.of(current_page -1, size, Sort.by(Sort.Direction.DESC, "purchaseId"));
 			
 			if(kwd.isBlank()) {
-				p = shopRepository.findAll(pageable);
+				p = purchaseRepository.findAll(pageable);
 			} else if(schType.equals("materialName")) {
-				p = shopRepository.findByMaterial_MaterialNameContaining(kwd, pageable);
+				p = purchaseRepository.findByMaterial_MaterialNameContaining(kwd, pageable);
 			}
 		} catch (IllegalArgumentException e) {
 		} catch (Exception e) {
@@ -56,42 +56,42 @@ public class ShopManageServiceImpl implements ShopManageService {
 
 	@Transactional
 	@Override
-	public void insertShop(Shop entity) throws Exception {
+	public void insertPurchase(Purchase entity) throws Exception {
 		try {
-			shopRepository.save(entity);
+			purchaseRepository.save(entity);
 		} catch (Exception e) {
-			log.info("insertShop: ", e);
+			log.info("insertPurchase: ", e);
 			throw e;
 		}
 	}
 
 	@Transactional
 	@Override
-	public void updateShop(Shop entity) throws Exception {
+	public void updatePurchase(Purchase entity) throws Exception {
 		try {
-			shopRepository.save(entity);
+			purchaseRepository.save(entity);
 		} catch (Exception e) {
-			log.info("updateShop: ", e);
+			log.info("updatePurchase: ", e);
 			throw e;
 		}
 	}
 
 	@Transactional
 	@Override
-	public void deleteShop(long shopid) throws Exception {
+	public void deletePurchase(long Purchaseid) throws Exception {
 		try {
-			shopRepository.deleteById(shopid);
+			purchaseRepository.deleteById(Purchaseid);
 		} catch (Exception e) {
-			log.info("deleteShop: ", e);
+			log.info("deletePurchase: ", e);
 			throw e;
 		}
 	}
 
 	@Override
-	public Shop findById(long shopid) {
+	public Purchase findById(long Purchaseid) {
 		
 		try {
-			return shopRepository.findByIdWithMaterial(shopid).orElse(null);
+			return purchaseRepository.findByIdWithDetails(Purchaseid).orElse(null);
 		
 		} catch (Exception e) {
 			log.info("findById: ", e);
