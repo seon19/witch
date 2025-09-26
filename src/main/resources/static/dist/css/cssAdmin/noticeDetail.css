@@ -1,0 +1,155 @@
+.title-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 1.5rem;
+}
+
+.title-container span {
+	font-size: 2rem;
+	font-weight: 700;
+	color: #212529;
+}
+
+.detail-card {
+	background-color: #ffffff;
+	border-radius: 8px;
+	border: 1px solid #e0e0e0;
+	overflow: hidden;
+}
+
+.card-header {
+	padding: 1.25rem 1.5rem;
+	background-color: #f8f9fa;
+	border-bottom: 1px solid #e0e0e0;
+}
+
+.card-header h2 {
+	font-size: 1.5rem;
+	font-weight: 600;
+	color: #212529;
+	margin: 0;
+}
+
+.card-body {
+	display: flex;
+	padding: 2rem 1.5rem;
+	gap: 2.5rem;
+}
+
+.detail-image-wrapper {
+	flex: 0 0 300px;
+}
+
+.detail-image-wrapper img {
+	width: 100%;
+	height: auto;
+	border-radius: 6px;
+	border: 1px solid #e9ecef;
+	object-fit: cover;
+}
+
+.detail-info {
+	flex: 1 1 auto;
+	display: flex;
+	flex-direction: column;
+	gap: 1.75rem;
+}
+
+.info-label {
+	display: block;
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: #6c757d;
+	margin-bottom: 0.5rem;
+}
+
+.info-value {
+	font-size: 1rem;
+	color: #333;
+	line-height: 1.6;
+	margin: 0;
+}
+
+.info-item-group {
+	display: flex;
+	gap: 3rem;
+	margin-top: auto;
+	padding-top: 1.5rem;
+	border-top: 1px solid #e9ecef;
+}
+
+.card-footer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 1rem 1.5rem;
+	background-color: #f8f9fa;
+	border-top: 1px solid #e0e0e0;
+}
+
+.btn {
+	padding: 0 1.25rem;
+	height: 38px;
+	line-height: 36px;
+	border: 1px solid transparent;
+	border-radius: 5px;
+	font-size: 0.9rem;
+	font-weight: 500;
+	cursor: pointer;
+	text-decoration: none;
+	display: inline-block;
+	text-align: center;
+	white-space: nowrap;
+	transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.btn-primary {
+	background-color: #4a90e2;
+	color: white;
+	border-color: #4a90e2;
+}
+
+.btn-primary:hover {
+	background-color: #357ABD;
+	border-color: #357ABD;
+}
+
+.btn-danger {
+	background-color: #dc3545;
+	color: white;
+	border-color: #dc3545;
+}
+
+.btn-danger:hover {
+	background-color: #c82333;
+	border-color: #bd2130;
+}
+
+.btn-secondary {
+	background-color: #6c757d;
+	color: white;
+	border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+	background-color: #5a6268;
+	border-color: #545b62;
+}
+
+.detail-card{background:#fff;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.05);overflow:hidden}
+    .card-header{padding:16px 20px;border-bottom:1px solid #eee}
+    .card-header h2{margin:0;font-size:20px}
+    .card-body{padding:20px}
+    .detail-info{display:grid;grid-template-columns:160px 1fr;row-gap:14px}
+    .info-label{color:#666}
+    .info-value{white-space:pre-line}
+    .card-footer{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-top:1px solid #eee}
+    .btn{cursor:pointer}
+    .btn + .btn{margin-left:8px}

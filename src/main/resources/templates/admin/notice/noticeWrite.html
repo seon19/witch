@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>공지사항 등록</title>
+  <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" type="text/css" />
+  <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/noticeWrite.css}" type="text/css" />
+</head>
+<body>
+
+<div class="main-container">
+  <div th:replace="~{/admin/menubar :: menubarFragment}"></div>
+
+  <div class="body-container">
+    <div class="title-container">
+      <span>공지사항 등록</span>
+    </div>
+
+    <div class="table-container">
+      <form name="noticeForm"
+            th:object="${notice}"
+            th:action="@{/admin/notice/write}"
+            method="post">
+
+        <table>
+          <tr>
+            <td style="width:140px;">공지명</td>
+            <td>
+              <input type="text" th:field="*{noticeName}" maxlength="100" required />
+            </td>
+          </tr>
+
+          <tr>
+            <td>공지내용</td>
+            <td>
+              <textarea rows="10" th:field="*{noticeContent}" maxlength="1000" required oninput="updateCount(this)"></textarea>
+            </td>
+          </tr>
+          
+          <tr>
+		  	<td>노출 여부</td>
+			  <td>
+			    <div class="radio-group">
+				  <label><input type="radio" th:field="*{visibility}" value="0"> 비공개</label>
+				  <label style="margin-left:14px;"><input type="radio" th:field="*{visibility}" value="1"> 공개</label>
+				</div>
+		  	</td>
+		</tr>
+          
+        </table>
+
+        <table>
+          <tr>
+            <td>
+              <div class="form-buttons">
+                <button type="button" class="btn btn-primary" onclick="submitNotice()">등록 완료</button>
+                <button type="reset" class="btn btn-outline">다시 입력</button>
+                <button type="button" class="btn btn-secondary" onclick="history.back()">등록 취소</button>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script th:inline="javascript">
+  function updateCount(el){
+    const c = document.getElementById('cnt');
+    if (c) c.textContent = el.value.length;
+  }
+
+  function submitNotice() {
+    const f = document.noticeForm;
+    if (!f['noticeName'].value.trim()) { alert('공지명을 입력하세요.'); f['noticeName'].focus(); return; }
+    if (!f['noticeContent'].value.trim()) { alert('공지내용을 입력하세요.'); f['noticeContent'].focus(); return; }
+    f.submit();
+  }
+
+  (function(){
+    const ta = document.querySelector('textarea[name="noticeContent"]');
+    if (ta) updateCount(ta);
+  })();
+</script>
+
+
+</body>
+</html>

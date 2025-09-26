@@ -21,7 +21,7 @@ import lombok.ToString;
 @Table(name = "member1")
 @SecondaryTable(
     name = "member2",
-    pkJoinColumns = @PrimaryKeyJoinColumn(name = "memberId")
+    pkJoinColumns = @PrimaryKeyJoinColumn(name = "memberid")
 )
 @Getter
 @Setter
@@ -33,7 +33,7 @@ public class Member {
 	@Column(name = "memberid")
 	private Long memberId;
 
-    @Column(name = "userid", nullable = false, length = 100)
+    @Column(name = "id", nullable = false, length = 100)
     private String userId;
 
     @Column(name = "password", nullable = false, length = 100)
