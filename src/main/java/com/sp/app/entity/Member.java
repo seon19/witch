@@ -33,7 +33,7 @@ public class Member {
 	@Column(name = "memberid")
 	private Long memberId;
 
-    @Column(name = "id", nullable = false, length = 100)
+    @Column(name = "userId", nullable = false, length = 100)
     private String userId;
 
     @Column(name = "password", nullable = false, length = 100)
