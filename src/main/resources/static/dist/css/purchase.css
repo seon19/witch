@@ -358,7 +358,7 @@ html, body {
 
 .page-navigation {
 	position: fixed;
-	top: 50%;
+	top: 52%;
 	right: 3vw;
 	transform: translateY(-50%);
 	z-index: 100;

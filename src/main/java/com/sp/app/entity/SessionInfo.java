@@ -20,6 +20,6 @@ public class SessionInfo {
 	private String email;
 	private int currentLevel;
 	private int currentExp;
-	private int currentBalance;
+	private long currentBalance;
 	private String profilePhoto;
 }

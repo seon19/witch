@@ -60,7 +60,7 @@ public class Member {
     private Integer currentExp;
 
     @Column(name = "currentbalance")
-    private Integer currentBalance;
+    private Long currentBalance;
 
     @Column(name = "name", table = "member2", length = 100)
     private String name;

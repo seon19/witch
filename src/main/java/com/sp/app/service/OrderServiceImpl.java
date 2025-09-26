@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sp.app.dto.UserSaleRequestDTO;
 import com.sp.app.entity.Inventory;
 import com.sp.app.entity.Material;
 import com.sp.app.entity.Member;
@@ -61,7 +62,7 @@ public class OrderServiceImpl implements OrderService {
 
         Orders savedOrder = orderRepository.save(order);
 
-        int newBalance = member.getCurrentBalance() - totalPrice;
+        long newBalance = member.getCurrentBalance() - totalPrice;
         member.setCurrentBalance(newBalance);
         Member updatedMember = memberRepository.save(member);
         
@@ -91,6 +92,49 @@ public class OrderServiceImpl implements OrderService {
         return savedOrder;
     }
     
-    
+    @Transactional
+    public void sellItem(Long memberId, UserSaleRequestDTO saleRequest) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
+
+        Inventory inventoryItem;
+        long sellPrice = 0;
+        
+        if ("MATERIAL".equals(saleRequest.getItemType())) {
+            inventoryItem = userInventoryRepository.findByMemberMemberIdAndMaterialMaterialId(memberId, saleRequest.getItemId())
+                .orElseThrow(() -> new IllegalStateException("판매할 아이템을 보유하고 있지 않습니다."));
+            sellPrice = inventoryItem.getMaterial().getMaterialPrice();
+
+        } else if ("POTION".equals(saleRequest.getItemType())) {
+            inventoryItem = userInventoryRepository.findByMemberMemberIdAndPotionPotionId(memberId, saleRequest.getItemId())
+                .orElseThrow(() -> new IllegalStateException("판매할 아이템을 보유하고 있지 않습니다."));
+
+        } else {
+            throw new IllegalArgumentException("알 수 없는 아이템 타입입니다.");
+        }
+
+        if (inventoryItem.getQuantity() < saleRequest.getQuantityOwned()) {
+            throw new IllegalStateException("보유 수량이 부족합니다.");
+        }
+
+        int newQuantity = inventoryItem.getQuantity() - saleRequest.getQuantityOwned();
+        if (newQuantity > 0) {
+            inventoryItem.setQuantity(newQuantity);
+        } else {
+            inventoryRepository.delete(inventoryItem);
+        }
+
+        long totalRevenue = sellPrice * saleRequest.getQuantityOwned();
+        member.setCurrentBalance(member.getCurrentBalance() + totalRevenue);
+    }
+
+	@Override
+	public void sellItem(long memberId, Long itemId, int quantity) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	
+
 }
 
