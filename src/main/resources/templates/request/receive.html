@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>의뢰받기</title>
+  <link rel="stylesheet" th:href="@{/dist/css/requestReceive.css}">
+</head>
+<body>
+  <div class="page-bg"
+       th:style="|background-image:url('@{/dist/images/{f}(f=의뢰.png)}')|"></div>
+
+  <div class="title-bar">
+    <span class="logo" th:onclick="|location.href='@{/main/home}'|">위치 크래프트</span>
+  </div>
+
+<main class="scene">
+  <div class="board-area" th:if="${#lists.size(cards) > 0}">
+    <div class="card" th:each="c : ${cards}">
+      <img class="parchment" th:src="@{/dist/images/{f}(f=의뢰양피지.png)}" alt="">
+      <div class="card-inner">
+        <div class="quest">
+          <div class="quest-top">
+            <div class="level" th:text="|Lv. ${c.requestLevel}|"></div>
+            <div class="title" th:text="${c.requestName}"></div>
+          </div>
+
+          <div class="content" th:text="${c.requestContent}"></div>
+          <div class="client" th:text="|from. ${c.client}|"></div>
+
+          <div class="reward">
+			  <div class="reward-title">보상</div>
+			
+			  <div class="reward-label">✨ 경험치</div>
+			  <div class="reward-value">
+			    <span th:text="${#numbers.formatInteger(c.rewardExp,0,'COMMA')}">0</span>
+			  </div>
+			
+			  <div class="reward-label">🪙 골드</div>
+			  <div class="reward-value">
+			    <span th:text="${#numbers.formatInteger(c.rewardGold,0,'COMMA')}">0</span>
+			  </div>
+			
+			  <div class="reward-label">🎁 아이템</div>
+			  <div class="reward-value items">
+			    <span class="item" th:each="it : ${c.rewardItems}">
+			      <img th:src="@{/uploads/material/{img}(img=${it.materialPhoto})}" alt="">
+			      <span class="qty" th:text="${it.qty}">1</span>
+			    </span>
+			  </div>
+		  </div>
+
+
+          <form th:action="@{/request/accept}" method="post">
+            <input type="hidden" name="id" th:value="${c.requestId}">
+            <div class="success">
+            	<button type="submit" class="btn-accept">의뢰 수락</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="board-area" th:if="${#lists.isEmpty(cards)}">
+    <div class="empty">진행중인 의뢰가 없습니다.</div>
+  </div>
+
+  <img class="assistant" th:src="@{/dist/images/{f}(f=의뢰조수.png)}" alt="조수">
+</main>
+
+
+
+</body>
+</html>
