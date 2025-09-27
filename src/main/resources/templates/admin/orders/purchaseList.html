@@ -68,8 +68,10 @@
 					<td th:text="${dataCount-(page-1)*size-status.index}"></td>
 					<td>
 						<img th:if="${dto.material != null}" th:src="@{/uploads/material/{imageName}(imageName=${dto.material.materialPhoto})}" width="80" height="80" style="object-fit: cover;">
-						<img th:if="${dto.potion != null}" th:src="@{/uploads/potion/{imageName}(imageName=${dto.potion.potionPhoto})}" width="80" height="80" style="object-fit: cover;">
-					</td>
+						<img th:if="${dto.potion != null}"
+								th:src="@{/uploads/potion/{imageName}(imageName=${dto.potion.potionPhoto})}"
+								width="80" height="80" style="object-fit: cover;">
+							</td>
 					<td>
 						<a th:href="@{/admin/orders/purchaseDetail/{purchaseId}(purchaseId=${dto.purchaseId}, page=${page})}">
 							<span th:if="${dto.material != null}" th:text="${dto.material.materialName}"></span>

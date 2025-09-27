@@ -9,6 +9,6 @@ public interface OrderService {
 
 	public void sellItem(Long memberId, UserSaleRequestDTO saleRequest);
 
-	public void sellItem(long memberId, Long itemId, int quantity);
+	public void sellItem1(long memberId, Long itemId, int quantity);
 
 }
