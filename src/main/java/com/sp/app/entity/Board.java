@@ -1,40 +1,44 @@
 package com.sp.app.entity;
 
 import java.time.LocalDateTime;
+import java.util.*;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Table(name = "board")
-@Getter
-@Setter
+@Getter @Setter
+@ToString(exclude = { "member", "replies", "likes" })
 public class Board {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "boardid")
+    @Column(name = "boardId")
     private Long boardId;
 
-    @Column(name = "postname", nullable = false, length = 100)
+    @Column(name = "postName", nullable = false, length = 100)
     private String postName;
 
-    @Column(name = "postdate", nullable = false)
-    private LocalDateTime postDate; 
-
-    @Column(name = "postcontent", nullable = false, length = 1000)
+    @Column(name = "postContent", nullable = false, length = 3000)
     private String postContent;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "memberid", nullable = false)
-    private Member member; 
+    @CreationTimestamp
+    @Column(name = "postDate", nullable = false, updatable = false)
+    private LocalDateTime postDate;
+
+    @Column(name = "hitCount", nullable = false)
+    private Integer hitCount = 0;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "memberId", nullable = false)
+    private Member member;
+
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BoardReply> replies = new ArrayList<>();
+
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<BoardLike> likes = new HashSet<>();
 }

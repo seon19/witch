@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>게시글 상세</title>
+  <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" />
+  <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/potionList.css}" />
+</head>
+<body>
+<div class="main-container">
+  <div th:replace="~{/admin/menubar :: menubarFragment}"></div>
+
+  <div class="body-container">
+    <header class="content-header">
+      <div class="header-top">
+        <div class="title-container"><span>게시글 상세정보</span></div>
+      </div>
+    </header>
+
+    <div class="table-container" style="padding:1.5rem;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 th:text="${board.postName}">제목</h2>
+        <div>
+          <form th:action="@{/admin/board/{id}/delete(id=${board.boardId})}" method="post" style="display:inline;">
+            <input type="hidden" name="page" th:value="${page}" />
+            <input type="hidden" name="size" th:value="${size}" />
+            <input type="hidden" name="kwd" th:value="${kwd}" />
+            <input type="hidden" name="target" th:value="${target}" />
+            <button type="submit" class="btn btn-secondary">삭제</button>
+          </form>
+          <button type="button" class="btn btn-outline"
+                  th:onclick="|location.href='@{/admin/board/boardList(page=${page},size=${size},kwd=${kwd},target=${target})}'|">
+            목록
+          </button>
+        </div>
+      </div>
+
+      <div style="margin-top:0.75rem; color:#6c757d;">
+        <span>작성자 :
+          <b th:text="${board.member != null ? (board.member.nickname != null ? board.member.nickname : (board.member.name != null ? board.member.name : board.member.userId)) : '알수없음'}"></b>
+        </span>
+        <span style="margin-left:1rem;">등록일자 :
+          <b th:text="${#temporals.format(board.postDate,'yyyy-MM-dd HH:mm')}"></b>
+        </span>
+        <span style="margin-left:1rem;">조회수 : <b th:text="${board.hitCount}"></b></span>
+      </div>
+
+      <hr style="margin:1rem 0;" />
+      <div style="white-space:pre-wrap;" th:text="${board.postContent}"></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
