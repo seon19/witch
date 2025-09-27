@@ -1,10 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
 <title>인벤토리 상세보기</title>
 </head>
 <body>
-
+<div th:fragment="inventoryDetail">
+    <div th:if="${dto != null}" class="detail-box">
+        <h3 th:text="${dto.material != null ? dto.material.materialName : dto.potion.potionName}"></h3>
+        <p th:text="${dto.material != null ? dto.material.materialDescription : dto.potion.potionDescription}"></p>
+        <p>수량: <span th:text="${dto.quantity}"></span></p>
+    </div>
+    
+    <div th:if="${dto == null}" class="empty-inventory">
+        선택한 아이템이 없습니다.
+    </div>
+</div>
 </body>
 </html>

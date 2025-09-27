@@ -25,19 +25,18 @@ public class InventoryServiceImpl implements InventoryService {
 	private final InventoryRepository inventoryRepository;
 	
 	@Override
-	public List<Inventory> listAll() {
-		List<Inventory> inventoryList = inventoryRepository.findAll();
-		return inventoryList;
+	public List<Inventory> listAll(long memberId) {
+		 return inventoryRepository.findByMemberMemberId(memberId);
 	}
 
 	@Override
-	public Page<Inventory> listPage(String schType, String kwd, int current_page, int size) {
+	public Page<Inventory> listPage(long memberId, String schType, String kwd, int current_page, int size) {
 	    Pageable pageable = PageRequest.of(current_page -1, size, Sort.by(Sort.Direction.DESC, "inventoryId"));
 
 	    if ("material".equals(schType)) {
-	        return inventoryRepository.findByMaterialIsNotNull(pageable);
+	        return inventoryRepository.findByMemberMemberIdAndMaterialIsNotNull(memberId, pageable);
 	    } else if ("potion".equals(schType)) {
-	        return inventoryRepository.findByPotionIsNotNull(pageable);
+	        return inventoryRepository.findByMemberMemberIdAndPotionIsNotNull(memberId, pageable);
 	    } else {
 	        return inventoryRepository.findAll(pageable);
 	    }
@@ -57,7 +56,5 @@ public class InventoryServiceImpl implements InventoryService {
 		}
 		return dto;
 	}
-
-
 	
 }

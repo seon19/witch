@@ -1,0 +1,74 @@
+/*상세보기*/
+.inventory-detail {
+  position: fixed;
+  top: 650px;
+  left: 338px;                
+  width: 260px;      
+  height: 200px;        
+  background-color: #D9D9D9;      
+  padding: 20px 15px;
+  color: white;              
+}
+
+/* 로그 영역 */
+.log-container {
+  position: fixed;
+  top: 318px;
+  right: 250px;                
+  width: 260px;      
+  height: 320px;        
+  background-color: #D9D9D9;      
+  padding: 20px 15px;
+  color: white;              
+}
+
+/* 인벤토리 상세보기 */
+.inventory-detail {
+  position: fixed;
+  top: 650px;
+  left: 338px;
+  width: 280px;
+  min-height: 220px;
+  background: #f5f0e6; /* 인벤토리 배경 톤과 맞춤 */
+  border: 2px solid #4b3f2f;
+  border-radius: 12px;
+  padding: 16px;
+  box-sizing: border-box;
+  color: #2c2c2c;
+  font-size: 14px;
+  overflow-y: auto;
+}
+
+/* 상세보기 안쪽 */
+.inventory-detail h3 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #000;
+  border-bottom: 1px solid #b8a68c;
+  padding-bottom: 4px;
+}
+
+.inventory-detail p {
+  margin: 6px 0;
+  line-height: 1.4;
+}
+
+/* 수량 표시 강조 */
+.inventory-detail p span {
+  font-weight: bold;
+  color: #7b3f00;
+}
+
+/* 아이템 없을 때 */
+.inventory-detail .empty-inventory {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: #777;
+  font-size: 0.95rem;
+  font-style: italic;
+}
+
+

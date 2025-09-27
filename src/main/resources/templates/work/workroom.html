@@ -1,10 +1,13 @@
 	<!DOCTYPE html>
-	<html>
+	<html xmlns:th="http://www.thymeleaf.org">
 	<head>
 	<meta charset="UTF-8">
 	<title>위치 크래프트</title>
 	<link rel="stylesheet" th:href="@{/dist/css/all.css}" type="text/css">
 	<link rel="stylesheet" th:href="@{/dist/css/workroom.css}" type="text/css">
+	<link rel="stylesheet" th:href="@{/dist/css/inventory.css}" type="text/css">
+	<link rel="stylesheet" th:href="@{/dist/css/inventorydetail.css}" type="text/css">
+	<link rel="stylesheet" th:href="@{/dist/css/craftPotion.css}" type="text/css">
 	
 	</head>
 	<body>
@@ -24,47 +27,52 @@
 		
 			<div class="button-container">
 				<button th:onclick="|location.href='@{/work/workroom}'|">공방</button>
-				<button class="spBtn2" th:onclick="|location.href='@{}'|">레시피북</button>
+				<button class="spBtn2" th:onclick="|location.href='@{/recipe/recipeMain}'|">레시피북</button>
 				<button class="spBtn3" th:onclick="|location.href='@{/orders/purchaseList}'|">상점</button>
 				<button class="spBtn4" th:onclick="|location.href='@{}'|">의뢰받기</button>
 			</div>
 		</div>
+
 		
+		<!-- 솥 버튼 -->
 		<div class="tool-container">
-			<button type="button"><img src="/dist/images/솥1.png" alt=""></button>
+		    <button type="button" class="soup-btn"><img src="/dist/images/솥1.png" alt="솥" width="100"></button>
 		</div>
-			<div class="create-container">
-			<button type="button"><img src="/dist/images/제작하기.png" alt=""></button>
-		</div>
+
 		
+		<!-- 제작 버튼
+		<div class="create-container">
+		    <button type="button" id="craftPotionBtn"><img src="/dist/images/제작하기.png" alt="제작하기"></button>
+		</div>
+		 -->
+
 		
 		<!-- 인벤토리 리스트 -->
 		<div class="inventory-container">
 	  
-	  		<!-- 탭 -->
-		  <div class="inventory-tabs" id="inventoryTabs">
+	  	<!-- 탭 -->
+		<div class="tabs" id="inventoryTabs">
 		    <button data-type="material" class="active">재료</button>
 		    <button data-type="potion">물약</button>
-		  </div>
+		</div>
 		  
-		  <!-- 카테고리 타이틀 -->
-		  <div class="inventory-category" id="inventoryCategory"><span th:text="${loginUser != null ? loginUser.name : 'Guest'} + '님의 인벤토리'"></span></div>
-		
+		<div class="category-title" id="inventoryCategory">
+		    <span th:text="${loginUser != null ? loginUser.name : 'Guest'} + '님의 인벤토리'"></span>
+		</div>
 		
 		  <div class="inventory-list" id="inventoryArea">
-		      <!-- 여기서 AJAX로 inventory.html의 fragment가 들어옴 -->
+
 		  </div>
 		</div>
 			
 	
-		
 		<!-- 인벤토리 상세 -->
 		<div class="inventory-detail" id="inventoryDetail">
 		
 		</div>
 		
-		<div class="log-container">
-			<p>로그 상세 영역</p>
+		<div class="log-container" id="logContainer">
+			<p>재료</p>
 		</div>
 	</div>
 	
@@ -74,6 +82,8 @@
 	let totalPage = 1;
 	let currentType = "material";
 	let loading = false;
+	let selectedMaterials = [];
+	let selectedPotionId = 1;
 	
 	$(function(){
 	    loadInventory(1, currentType);
@@ -122,6 +132,28 @@
 	        }
 	    });
 	}
+	
+	// 아이템 클릭 시 상세보기 Ajax
+	$(document).on("click", ".inventory-item", function () {
+	    let inventoryId = $(this).data("id");
+	    let page = currentPage;
+	    let schType = currentType;
+
+	    $.ajax({
+	        url: "/work/inventoryDetail/" + inventoryId,
+	        type: "GET",
+	        data: { page: page, schType: schType },
+	        success: function (fragment) {
+	            $("#inventoryDetail").html(fragment); 
+	        },
+	        error: function () {
+	            alert("상세 정보를 불러오는 데 실패했습니다.");
+	        }
+	    });
+	});
+	
+
+	
 	</script>
 	</body>
 	</html>
