@@ -177,7 +177,7 @@ body {
 }
 
 .section {
-    background: #fdfaf4;
+    background: rgba(245, 233, 210, 0.6);
     border: 1px solid #d4c6a8;
     border-radius: 8px;
     padding: 3px 12px 3px 12px;
