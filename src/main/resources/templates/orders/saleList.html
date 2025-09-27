@@ -27,26 +27,35 @@
 			</div>
 
 			<div class="grid-container" th:if="${not #lists.isEmpty(list)}">
-				<div class="item-card" th:each="dto : ${list}">
-					<div class="item-card-content"
-						 th:attr="data-id=${dto.itemId}, 
-								  data-item-type=${dto.itemType},
-								  data-name=${dto.itemName},
-								  data-price=${dto.sellPrice},
-								  data-photo=@{/uploads/material/{imageName}(imageName=${dto.itemPhoto})},
-								  data-description=${dto.itemDescription},
-								  data-quantity-owned=${dto.quantityOwned}">
-						
-						<div class="card-image-wrapper">
-							<img th:src="@{/uploads/material/{imageName}(imageName=${dto.itemPhoto})}" alt="아이템 이미지">
-						</div>
-						<div class="card-info">
-							<div class="item-name" th:text="${dto.itemName}"></div>
-							<div class="item-price" th:text="${#numbers.formatInteger(dto.sellPrice, 0, 'COMMA') + ' 원'}"></div>
-						</div>
-					</div>
-				</div>
-			</div>
+    <div class="item-card" th:each="dto : ${list}">
+    
+        <div class="item-card-content"
+             th:attr="data-id=${dto.itemId}, 
+                      data-item-type=${dto.itemType},
+                      data-name=${dto.itemName},
+                      data-price=${dto.sellPrice},
+                      data-photo=${dto.itemType == 'MATERIAL' ? 
+                                  '/uploads/material/' + dto.itemPhoto : 
+                                  '/uploads/potion/' + dto.itemPhoto},
+                      data-description=${dto.itemDescription},
+                      data-quantity-owned=${dto.quantityOwned}">
+            
+            <div class="card-image-wrapper">
+                <img th:if="${dto.itemType == 'MATERIAL'}" 
+                     th:src="@{/uploads/material/{imageName}(imageName=${dto.itemPhoto})}" 
+                     alt="아이템 이미지">
+                <img th:if="${dto.itemType == 'POTION'}" 
+                     th:src="@{/uploads/potion/{imageName}(imageName=${dto.itemPhoto})}" 
+                     alt="아이템 이미지">
+            </div>
+
+            <div class="card-info">
+                <div class="item-name" th:text="${dto.itemName}"></div>
+                <div class="item-price" th:text="${#numbers.formatInteger(dto.sellPrice, 0, 'COMMA') + ' 원'}"></div>
+            </div>
+        </div>
+        
+    </div> </div>
 
 			<div class="noList" th:if="${#lists.isEmpty(list)}">
 				<p>판매할 수 있는 아이템이 없습니다.</p>
@@ -148,6 +157,16 @@
 				quantityInput.value = 1;
 				quantityInput.max = maxQuantity;
 				updateTotalPrice();
+				
+				if (maxQuantity > 0) {
+		            modalActionButton.disabled = false;
+		            modalActionButton.style.opacity = 1;
+		            modalActionButton.textContent = '판매하기';
+		        } else {
+		            modalActionButton.disabled = true;
+		            modalActionButton.style.opacity = 0.6;
+		            modalActionButton.textContent = '보유 수량 없음';
+		        }
 
 				modal.style.display = 'flex';
 			});

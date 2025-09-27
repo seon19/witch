@@ -4,14 +4,7 @@ import lombok.Data;
 
 @Data
 public class UserSaleRequestDTO {
-	private Long purchaseId;
-    private String itemName;
-    private String itemDescription;
-    private String itemPhoto;
-    private int sellPrice; // 사용자가 팔 때 받을 가격
-    private String itemType;
     private Long itemId;
-
-    // Inventory 정보
-    private int quantityOwned; // 사용자가 보유한 수량
+    private String itemType;
+    private int quantity;
 }

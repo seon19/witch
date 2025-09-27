@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sp.app.dto.SellableItemDTO;
 import com.sp.app.dto.UserPurchaseRequestDTO;
 import com.sp.app.dto.UserSaleRequestDTO;
 import com.sp.app.entity.Member;
@@ -119,8 +120,7 @@ public class OrderController {
 			
 			Pageable pageable = PageRequest.of(page - 1, 10);
 		    
-		    // [수정] 새로운 서비스를 호출하여 SellableItemDTO 목록을 가져옵니다.
-		    Page<UserSaleRequestDTO> pageData = purchaseService.getSellableItems(loginUser.getMemberId(), pageable);
+		    Page<SellableItemDTO> pageData = purchaseService.getSellableItems(loginUser.getMemberId(), pageable);
 		    
 		    model.addAttribute("list", pageData.getContent());
 			
@@ -151,10 +151,8 @@ public class OrderController {
 	    }
 
 	    try {
-	        // [수정] DTO 객체 전체를 서비스에 전달
 	        orderService.sellItem(loginUser.getMemberId(), saleRequest);
 
-	        // 변경된 잔액 정보를 세션에 업데이트
 	        Member updatedMember = memberService.findById(loginUser.getMemberId());
 	        loginUser.setCurrentBalance(updatedMember.getCurrentBalance());
 	        session.setAttribute("loginUser", loginUser);

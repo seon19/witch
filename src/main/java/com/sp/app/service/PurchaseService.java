@@ -3,10 +3,10 @@ package com.sp.app.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.sp.app.dto.UserSaleRequestDTO;
+import com.sp.app.dto.SellableItemDTO;
 
 public interface PurchaseService {
 
-	Page<UserSaleRequestDTO> getSellableItems(Long memberId, Pageable pageable);
+	Page<SellableItemDTO> getSellableItems(Long memberId, Pageable pageable);
 
 }

@@ -4,8 +4,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.sp.app.dto.UserSaleRequestDTO;
+import com.sp.app.dto.SellableItemDTO;
 import com.sp.app.entity.Inventory;
+import com.sp.app.entity.Material;
+import com.sp.app.entity.Potion;
 import com.sp.app.entity.Purchase;
 import com.sp.app.repository.UserInventoryRepository;
 import com.sp.app.repository.UserPurchaseRepository;
@@ -16,29 +18,47 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PurchaseServiceImpl implements PurchaseService {
 
-    private final UserPurchaseRepository userpurchaseRepository;
-    private final UserInventoryRepository inventoryRepository;
+    private final UserPurchaseRepository userPurchaseRepository;
+    private final UserInventoryRepository userInventoryRepository;
 
-    public Page<UserSaleRequestDTO> getSellableItems(Long memberId, Pageable pageable) {
-        // [수정] isAvailable가 true인 아이템만 조회하도록 변경
-        Page<Purchase> purchasePage = userpurchaseRepository.findAllByIsAvailable(true, pageable);
+    public Page<SellableItemDTO> getSellableItems(Long memberId, Pageable pageable) {
+
+        Page<Purchase> purchasePage = userPurchaseRepository.findAllByIsAvailable(true, pageable);
 
         return purchasePage.map(purchase -> {
-        	UserSaleRequestDTO dto = new UserSaleRequestDTO();
-            // ... DTO 변환 로직 (이전 답변과 동일) ...
-            // ... 사용자의 인벤토리를 확인하여 quantityOwned 채우기 ...
+            SellableItemDTO dto = new SellableItemDTO();
+            
+            dto.setPurchaseId(purchase.getPurchaseId());
+            dto.setSellPrice(purchase.getPurchasePrice()); 
+
             int quantityOwned = 0;
+            
             if (purchase.getMaterial() != null) {
-                quantityOwned = inventoryRepository
-                    .findByMemberMemberIdAndMaterialMaterialId(memberId, purchase.getMaterial().getMaterialId())
+                Material item = purchase.getMaterial();
+                dto.setItemType("MATERIAL");
+                dto.setItemId(item.getMaterialId());
+                dto.setItemName(item.getMaterialName());
+                dto.setItemDescription(item.getMaterialDescription());
+                dto.setItemPhoto(item.getMaterialPhoto());
+                
+                quantityOwned = userInventoryRepository 
+                    .findByMemberMemberIdAndMaterialMaterialId(memberId, item.getMaterialId())
                     .map(Inventory::getQuantity).orElse(0);
+
             } else if (purchase.getPotion() != null) {
-                quantityOwned = inventoryRepository
-                    .findByMemberMemberIdAndPotionPotionId(memberId, purchase.getPotion().getPotionId())
+                Potion item = purchase.getPotion();
+                dto.setItemType("POTION");
+                dto.setItemId(item.getPotionId());
+                dto.setItemName(item.getPotionName());
+                dto.setItemDescription(item.getPotionDescription());
+                dto.setItemPhoto(item.getPotionPhoto());
+                
+                quantityOwned = userInventoryRepository
+                    .findByMemberMemberIdAndPotionPotionId(memberId, item.getPotionId())
                     .map(Inventory::getQuantity).orElse(0);
             }
-            dto.setQuantityOwned(quantityOwned);
             
+            dto.setQuantityOwned(quantityOwned);
             return dto;
         });
     }
