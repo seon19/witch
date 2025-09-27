@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>게시판 관리</title>
+  <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" />
+  <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/boardList.css}" />
+</head>
+<body>
+<div class="main-container">
+  <div th:replace="~{/admin/menubar :: menubarFragment}"></div>
+
+  <div class="body-container">
+    <header class="content-header">
+      <div class="header-top">
+        <div class="title-container"><span>게시판 관리</span></div>
+      </div>
+
+      <div class="header-bottom">
+        <div>
+          <form name="searchForm" class="form-search" th:action="@{/admin/board/boardList}" method="get">
+			  <select name="target">
+			    <option value="TITLE_CONTENT" th:selected="${target}=='TITLE_CONTENT'">제목+내용</option>
+			    <option value="AUTHOR"        th:selected="${target}=='AUTHOR'">작성자</option>
+			  </select>
+			  <input type="text" name="kwd" th:value="${kwd}">
+			  <button type="button" class="btn-default" onclick="searchList()">검색</button>
+		  </form>
+        </div>
+      </div>
+    </header>
+
+    <div><span class="dataCount"></span></div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+        <tr>
+          <th>번호</th>
+          <th>게시글명</th>
+          <th>게시글내용</th>
+          <th>작성자</th>
+          <th>등록일자</th>
+          <th>조회수</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="b, st : ${list}">
+          <td th:text="${dataCount - (page.number * size) - st.index}"></td>
+          <td>
+            <a th:href="@{/admin/board/{id}(id=${b.boardId},page=${page.number+1},size=${size},kwd=${kwd},target=${target})}"
+               th:text="${b.postName}"></a>
+          </td>
+          <td th:text="${#strings.length(b.postContent) > 30 ? #strings.substring(b.postContent,0,30) + '…' : b.postContent}"></td>
+          <td>
+            <span th:text="${b.member != null ? (b.member.nickname != null ? b.member.nickname : (b.member.name != null ? b.member.name : b.member.userId)) : '알수없음'}"></span>
+          </td>
+          <td th:text="${#temporals.format(b.postDate,'yyyy-MM-dd')}"></td>
+          <td th:text="${b.hitCount}"></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(list)}" class="empty-row">
+          <td colspan="6">등록된 게시글이 없습니다.</td>
+        </tr>
+        </tbody>
+      </table>
+
+      <div class="table-footer">
+        <div class="page-navigation-container">
+          <div class="page-navigation"></div>
+        </div>
+        <div class="btn-refresh-container">
+          <button type="button" class="btn btn-outline"
+                  th:onclick="|location.href='@{/admin/board/boardList}'|">새로고침</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script th:src="@{/dist/js/paging.js}"></script>
+<script th:inline="javascript">
+  window.addEventListener('DOMContentLoaded', function () {
+    const page      = /*[[${pageNo}]]*/ 1;
+    const pageSize  = /*[[${size}]]*/ 10;
+    const dataCount = /*[[${dataCount}]]*/ 0;
+    let   url       = /*[[@{/admin/board/boardList}]]*/ '';
+
+    const kwd    = /*[[${kwd}]]*/ '';
+    const target = /*[[${target}]]*/ 'TITLE_CONTENT';
+    if (kwd && kwd.trim().length > 0) {
+      url = /*[[@{/admin/board/boardList(target=${target}, kwd=${kwd})}]]*/ '';
+    }
+
+    const total_page = pageCount(Number(dataCount), Number(pageSize));
+    const paging     = pagingUrl(Number(page), total_page, url);
+
+    const dc = document.querySelector('.dataCount');
+    if (dc) dc.textContent = `${dataCount}개 (${page}/${total_page} 페이지)`;
+
+    const nav = document.querySelector('.page-navigation');
+    if (nav) nav.innerHTML = dataCount === 0 ? '' : paging;
+  });
+
+  function searchList() {
+    const f = document.searchForm;
+    if (!f.kwd.value.trim()) { f.kwd.focus(); return; }
+    f.submit();
+  }
+</script>
+
+
+</body>
+</html>
