@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>게시판 관리</title>
   <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" />
-  <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/potionList.css}" />
+  <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/boardList.css}" />
 </head>
 <body>
 <div class="main-container">
@@ -18,14 +18,14 @@
 
       <div class="header-bottom">
         <div>
-          <form name="searchForm" class="form-search" method="get" th:action="@{/admin/board/boardList}">
-            <select name="target">
-              <option value="TITLE_CONTENT" th:selected="${target} == 'TITLE_CONTENT'">제목+내용</option>
-              <option value="AUTHOR" th:selected="${target} == 'AUTHOR'">작성자</option>
-            </select>
-            <input type="text" name="kwd" th:value="${kwd}" placeholder="검색어" />
-            <button type="button" class="btn-default" onclick="searchList()">검색</button>
-          </form>
+          <form name="searchForm" class="form-search" th:action="@{/admin/board/boardList}" method="get">
+			  <select name="target">
+			    <option value="TITLE_CONTENT" th:selected="${target}=='TITLE_CONTENT'">제목+내용</option>
+			    <option value="AUTHOR"        th:selected="${target}=='AUTHOR'">작성자</option>
+			  </select>
+			  <input type="text" name="kwd" th:value="${kwd}">
+			  <button type="button" class="btn-default" onclick="searchList()">검색</button>
+		  </form>
         </div>
       </div>
     </header>
@@ -80,22 +80,34 @@
 <script th:src="@{/dist/js/paging.js}"></script>
 <script th:inline="javascript">
   window.addEventListener('DOMContentLoaded', function () {
-    const page      = /*[[${pageNo}]]*/ 1;   // 1-base 숫자
+    const page      = /*[[${pageNo}]]*/ 1;
     const pageSize  = /*[[${size}]]*/ 10;
     const dataCount = /*[[${dataCount}]]*/ 0;
+    let   url       = /*[[@{/admin/board/boardList}]]*/ '';
 
-    const url = /*[[@{/admin/board/boardList}]]*/ '';
+    const kwd    = /*[[${kwd}]]*/ '';
+    const target = /*[[${target}]]*/ 'TITLE_CONTENT';
+    if (kwd && kwd.trim().length > 0) {
+      url = /*[[@{/admin/board/boardList(target=${target}, kwd=${kwd})}]]*/ '';
+    }
+
     const total_page = pageCount(Number(dataCount), Number(pageSize));
     const paging     = pagingUrl(Number(page), total_page, url);
 
     const dc = document.querySelector('.dataCount');
-    if (dc) dc.textContent =
-      Number(dataCount) === 0 ? '0개' : `${dataCount}개 (${page}/${total_page} 페이지)`;
+    if (dc) dc.textContent = `${dataCount}개 (${page}/${total_page} 페이지)`;
 
     const nav = document.querySelector('.page-navigation');
-    if (nav) nav.innerHTML = Number(dataCount) === 0 ? '' : paging;
+    if (nav) nav.innerHTML = dataCount === 0 ? '' : paging;
   });
+
+  function searchList() {
+    const f = document.searchForm;
+    if (!f.kwd.value.trim()) { f.kwd.focus(); return; }
+    f.submit();
+  }
 </script>
+
 
 </body>
 </html>

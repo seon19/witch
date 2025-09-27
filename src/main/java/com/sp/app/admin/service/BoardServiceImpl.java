@@ -22,9 +22,14 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<Board> list(Pageable pageable) {
-        return boardRepository.findAll(pageable);
+    public Page<Board> list(String kwd, String target, Pageable pageable) {
+        String key = (kwd == null) ? "" : kwd.trim();
+        if ("AUTHOR".equalsIgnoreCase(target)) {
+            return boardRepository.findByAuthor(key, pageable);
+        }
+        return boardRepository.findByTitleOrContent(key, pageable);
     }
+
 
     @Override
     @Transactional(readOnly = true)

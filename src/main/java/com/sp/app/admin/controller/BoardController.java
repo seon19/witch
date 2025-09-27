@@ -19,18 +19,22 @@ public class BoardController {
     private final BoardService boardService;
 
     @GetMapping("/boardList")
-    public String list(@RequestParam(name = "page", defaultValue = "1") int page,
-                       @RequestParam(name = "size", defaultValue = "10") int size,
+    public String list(@RequestParam(name = "kwd",    defaultValue = "")  String kwd,
+                       @RequestParam(name = "target", defaultValue = "TITLE_CONTENT") String target,
+                       @RequestParam(name = "page",   defaultValue = "1") int page,
+                       @RequestParam(name = "size",   defaultValue = "10") int size,
                        Model model) {
 
         Pageable pageable = PageRequest.of(Math.max(0, page - 1), size);
-        Page<Board> result = boardService.list(pageable);
+        Page<Board> result = boardService.list(kwd, target, pageable);
 
         model.addAttribute("list", result.getContent());
-        model.addAttribute("page", result);                 // Page 객체
-        model.addAttribute("pageNo", result.getNumber() + 1); // 1-base 숫자
+        model.addAttribute("page", result);              
+        model.addAttribute("pageNo", result.getNumber()+1);
         model.addAttribute("size", result.getSize());
         model.addAttribute("dataCount", result.getTotalElements());
+        model.addAttribute("kwd", kwd);
+        model.addAttribute("target", target);
         return "admin/board/boardList";
     }
 
