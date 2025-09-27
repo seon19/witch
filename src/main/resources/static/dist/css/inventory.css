@@ -1,0 +1,132 @@
+/* 인벤토리 전체 */
+.inventory-wrapper {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+/* 인벤토리 컨테이너 */
+.inventory-container {
+  position: fixed;
+  top: 210px;
+  left: 338px;
+  width: 280px;
+  height: 380px;
+  background: #f2e8dc;
+  display: flex;
+  flex-direction: column;
+  font-size: 10px;
+  color: #111;
+  overflow-y: auto;
+}
+
+/* 탭 */
+.inventory-tabs {
+    display: flex;
+}
+
+.inventory-tabs button {
+    flex: 1;
+    padding: 6px 0;
+    border: none;
+    background: #ccc;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.inventory-tabs button.active {
+    background: #fff;
+    border-bottom: 2px solid #fff;
+}
+
+/* 카테고리 */
+.inventory-container .category-title {
+    text-align: center;
+    padding: 5px 0;
+    background: #e5e5e5;
+    font-size: 11px;
+    font-weight: bold;
+    border-top: 2px solid #111;
+    border-bottom: 2px solid #111;
+}
+
+/* 탭 */
+.inventory-container .tabs {
+    display: flex;
+}
+
+.inventory-container .tabs button {
+    flex: 1;
+    padding: 6px 0;
+    border: none;
+    background: #ccc;
+    cursor: pointer;
+    font-weight: bold;
+    border-left: 2px solid #111;
+}
+
+.inventory-container .tabs button.active {
+    background: #fff;
+}
+
+/* 인벤토리 리스트: 그리드 적용 */
+.inventory-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 8px;
+    overflow-y: auto;
+    max-height: 100%; 
+}
+
+/* 아이템 */
+.inventory-item {
+    display: flex;
+    justify-content: center;
+}
+
+.item-box {
+  width: 100%;
+  aspect-ratio: 1/1;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid #111;
+  background: #e5d9c8;
+}
+
+.item-box img {
+    max-width: 70%;   
+    max-height: 70%;  
+}
+
+.item-box:hover {
+    transform: scale(1.05);
+    background-color: #aaa;
+}
+
+/* 아이템 수량 */
+.item-quantity {
+    position: absolute;
+    bottom: 2px;
+    right: 4px;
+    font-size: 12px;
+    background: #111;
+    color: #f2e8dc;
+    padding: 5px 7px;
+    border-radius: 0;
+}
+
+
+/* 비었을 때 */
+.empty-inventory {
+    display: flex;
+    justify-content: center; 
+    align-items: center;  
+    height: 100%;          
+    color: #666;
+    font-size: 14px;        
+    text-align: center;     
+}
+

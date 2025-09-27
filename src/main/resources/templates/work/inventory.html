@@ -4,11 +4,10 @@
 <meta charset="UTF-8">
 <title>인벤토리</title>
 <link rel="stylesheet" th:href="@{/dist/css/all.css}" type="text/css">
-<link rel="stylesheet" th:href="@{/dist/css/inventory.css}" type="text/css">
 </head>
 <body>
 <div th:fragment="inventoryList">
-   <div th:each="dto, status : ${list}" class="inventory-item">
+   <div th:each="dto : ${list}" class="inventory-item" th:attr="data-id=${dto.inventoryId}">
 	    <div class="item-box">
 	        <img th:if="${dto.potion != null}" 
 	             th:src="@{/uploads/potion/{imageName}(imageName=${dto.potion.potionPhoto})}" 

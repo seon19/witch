@@ -1,11 +1,13 @@
 package com.sp.app.controller;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -27,11 +29,11 @@ public class WorkroomController {
 	private final MyUtil myUtil;
 
 	@GetMapping("workroom")
-	public String workroom() throws Exception {
+	public String workroom(HttpSession session, Model model) throws Exception {
 		
 		try {
-			
-			
+			SessionInfo loginUser = (SessionInfo) session.getAttribute("loginUser");  
+			 model.addAttribute("loginUser", loginUser);
 		} catch (Exception e) {
 			log.info("workroom: ", e);
 		}
@@ -52,8 +54,8 @@ public class WorkroomController {
 	        kwd = myUtil.decodeUrl(kwd);
 
 	        int size = 10;
-	        Page<Inventory> pageInventory = inventoryserive.listPage(schType, kwd, current_page, size);
-
+	        Page<Inventory> pageInventory = inventoryserive.listPage(loginUser.getMemberId(), schType, kwd, current_page, size);
+	       
 	        int total_page = pageInventory.getTotalPages();
 	        long dataCount = pageInventory.getTotalElements();
 
@@ -73,4 +75,29 @@ public class WorkroomController {
 	    }
 	    return "work/inventory :: inventoryList";
 	}
+	
+	@GetMapping("inventoryDetail/{inventoryId}")
+	public String inventoryDetail(@PathVariable("inventoryId") long inventoryId,
+			@RequestParam(name = "page") String page,
+			@RequestParam(name="schType", defaultValue = "all") String schType,
+			Model model) throws Exception {
+		
+		String query = "page=" + page;
+		try {
+			Inventory dto = Objects.requireNonNull(inventoryserive.findById(inventoryId));
+			
+			model.addAttribute("dto", dto);
+			model.addAttribute("page", page);
+			model.addAttribute("schType", schType);
+			
+			return "work/inventoryDetail";
+		} catch (NullPointerException e) {
+			log.debug("inventoryDetail : ", e);
+		} catch (Exception e) {
+			log.info("inventoryDetail : ", e );
+		}
+		return "redirect:/work/inventoryList?" + query;
+	}
+	
+	
 }
