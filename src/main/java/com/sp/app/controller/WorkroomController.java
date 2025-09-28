@@ -1,6 +1,8 @@
 package com.sp.app.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.data.domain.Page;
@@ -16,10 +18,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.sp.app.common.MyUtil;
 import com.sp.app.entity.CraftLog;
 import com.sp.app.entity.Inventory;
+import com.sp.app.entity.Member;
 import com.sp.app.entity.Potion;
 import com.sp.app.entity.SessionInfo;
 import com.sp.app.service.CraftLogService;
 import com.sp.app.service.InventoryService;
+import com.sp.app.service.MemberService;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 public class WorkroomController {
 	private final InventoryService inventoryserive;
 	private final CraftLogService craftlogservice;
+	private final MemberService memberservice;
 	private final MyUtil myUtil;
 
 	@GetMapping("workroom")
@@ -117,18 +122,29 @@ public class WorkroomController {
 	
 	@PostMapping("craftPotion")
 	@ResponseBody
-	public String makePotion(@RequestParam("firstMaterialId") long firstMaterialId,
-	                         @RequestParam("secondMaterialId") long secondMaterialId,
-	                         HttpSession session) {
-		 
-	        try {
-	            Long memberId = ((SessionInfo) session.getAttribute("loginUser")).getMemberId();
-	            Potion potion = inventoryserive.craftPotion(memberId, firstMaterialId, secondMaterialId);
-	            return "성공: " + potion.getPotionName() + " 제조 완료!";
-	        } catch (Exception e) {
-	            return "레시피가 존재하지 않습니다.";
-	        }
+	public Map<String, Object> makePotion(@RequestParam("firstMaterialId") long firstMaterialId,
+	                                      @RequestParam("secondMaterialId") long secondMaterialId,
+	                                      HttpSession session) {
+
+	    Map<String, Object> result = new HashMap<>();
+	    try {
+	        Long memberId = ((SessionInfo) session.getAttribute("loginUser")).getMemberId();
+	        Potion potion = inventoryserive.craftPotion(memberId, firstMaterialId, secondMaterialId);
+
+	        // 경험치 증가
+	        Member updatedMember = memberservice.addExp(memberId, potion.getExp());
+
+	        result.put("success", true);
+	        result.put("msg", "성공: " + potion.getPotionName() + " 제조 완료!");
+	        result.put("currentExp", updatedMember.getCurrentExp());
+	        result.put("currentLevel", updatedMember.getCurrentLevel());
+
+	    } catch (Exception e) {
+	        result.put("success", false);
+	        result.put("msg", "레시피가 존재하지 않습니다.");
 	    }
+	    return result;
+	}
 	
 	@GetMapping("/craftLog")
 	public String craftLogList(

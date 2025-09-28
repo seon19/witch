@@ -9,5 +9,7 @@ public interface MemberService {
 	public Member loginMember(Map<String, Object> map);
 
 	public Member findById(long memberId);
+	
+	public Member addExp(long memberId, int expGained);
 
 }

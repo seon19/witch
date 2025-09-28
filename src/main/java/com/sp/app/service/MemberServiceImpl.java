@@ -45,5 +45,30 @@ public class MemberServiceImpl implements MemberService {
 		
 		return dto;
 	}
+
+	@Transactional
+	@Override
+	public Member addExp(long memberId, int expGained) {
+		  Member member = memberRepository.findById(memberId)
+                  .orElseThrow(() -> new RuntimeException("회원 없음"));
+
+		int newExp = member.getCurrentExp() + expGained;
+		int newLevel = member.getCurrentLevel();
+		
+		while (newExp >= 1000 && newLevel < 5) {
+		   newExp -= 1000;
+		   newLevel++;
+		}
+		
+		if (newLevel == 5 && newExp > 1000) {
+		   newExp = 1000;
+		}
+		
+		member.setCurrentExp(newExp);
+		member.setCurrentLevel(newLevel);
+		
+		return memberRepository.save(member);
+		
+	}
 	
 }

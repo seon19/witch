@@ -227,15 +227,26 @@ function makePotion() {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `firstMaterialId=${first}&secondMaterialId=${second}`
     })
-        .then(res => res.text())
-        .then(msg => {
-            showMessage(msg, msg.includes("성공") ? "success" : "error");
-            loadInventory(1, currentType);  
-            loadMaterials();    
-            loadCraftLog(1);
-            closeCraftModal();               
-        })
-        .catch(err => showMessage("포션 제작 중 오류가 발생했습니다.", "error"));
+    .then(res => res.json()) // JSON으로 받기
+    .then(data => {
+        // 서버에서 반환된 메시지, 새 경험치, 레벨
+        showMessage(data.msg, data.success ? "success" : "error");
+
+        // 경험치 바 갱신
+        const expFill = document.querySelector(".expbar-fill");
+        const expText = document.querySelector(".exp-text");
+        const expLevel = document.querySelector(".exp-level");
+
+        expFill.style.width = (data.currentExp / 1000 * 100) + "%";
+        expText.innerText = data.currentExp + " / 1000 EXP";
+        expLevel.innerText = "Lv." + data.currentLevel;
+
+        loadInventory(1, currentType);
+        loadMaterials();
+        loadCraftLog(1);
+        closeCraftModal();
+    })
+    .catch(err => showMessage("포션 제작 중 오류가 발생했습니다.", "error"));
 }
 
 // 메시지 표시 함수
@@ -247,7 +258,7 @@ function showMessage(text, type) {
 
     setTimeout(() => {
         msgEl.style.display = "none";
-    }, 3000); // 3초 후 사라짐
+    }, 1000); 
 }
 
 // 모달 열기
