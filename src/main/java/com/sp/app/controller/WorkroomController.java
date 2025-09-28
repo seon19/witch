@@ -127,21 +127,34 @@ public class WorkroomController {
 	                                      HttpSession session) {
 
 	    Map<String, Object> result = new HashMap<>();
+	    Long memberId = ((SessionInfo) session.getAttribute("loginUser")).getMemberId();
 	    try {
-	        Long memberId = ((SessionInfo) session.getAttribute("loginUser")).getMemberId();
 	        Potion potion = inventoryserive.craftPotion(memberId, firstMaterialId, secondMaterialId);
 
-	        // 경험치 증가
-	        Member updatedMember = memberservice.addExp(memberId, potion.getExp());
+	        if (potion != null) {
+	            // 경험치 증가
+	            Member updatedMember = memberservice.addExp(memberId, potion.getExp());
 
-	        result.put("success", true);
-	        result.put("msg", "성공: " + potion.getPotionName() + " 제조 완료!");
-	        result.put("currentExp", updatedMember.getCurrentExp());
-	        result.put("currentLevel", updatedMember.getCurrentLevel());
+	            result.put("success", true);
+	            result.put("msg", "성공: " + potion.getPotionName() + " 제조 완료!");
+	            result.put("currentExp", updatedMember.getCurrentExp());
+	            result.put("currentLevel", updatedMember.getCurrentLevel());
+	        } else {
+	            // 실패: 레시피 없음
+	            Member member = memberservice.findById(memberId); // 현재 경험치/레벨 그대로
+	            result.put("success", false);
+	            result.put("msg", "레시피가 존재하지 않습니다.");
+	            result.put("currentExp", member.getCurrentExp());
+	            result.put("currentLevel", member.getCurrentLevel());
+	        }
 
 	    } catch (Exception e) {
+	        log.error("craftPotion error: ", e);
+	        Member member = memberservice.findById(memberId); // 예외 시에도 값 유지
 	        result.put("success", false);
-	        result.put("msg", "레시피가 존재하지 않습니다.");
+	        result.put("msg", "제작 중 오류가 발생했습니다.");
+	        result.put("currentExp", member.getCurrentExp());
+	        result.put("currentLevel", member.getCurrentLevel());
 	    }
 	    return result;
 	}
