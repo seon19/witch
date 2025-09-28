@@ -1,0 +1,61 @@
+/* 로그 컨테이너 */
+.log-container {
+    position: fixed;
+    top: 318px;
+    right: 250px;
+    width: 260px;
+    height: 320px;
+    padding: 15px;
+    background: rgba(30, 30, 30, 0.8); 
+    border: 2px solid #a86bff;         
+    border-radius: 8px;
+    box-shadow: 0 0 10px #000;
+    color: #fff;
+    font-family: 'Courier New', Courier, monospace;
+    overflow-y: auto;
+}
+
+/* 로그 제목 */
+.log-container h3 {
+    text-align: center;
+    font-size: 16px;
+    margin-bottom: 3px;
+    margin-top: 5px;
+    color: #ffd700;
+    text-shadow: 1px 1px 2px #000;
+}
+
+/* 로그 테이블 제거, 대신 ul 리스트 사용 */
+.log-container table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* 로그 행 스타일 */
+.log-container tbody tr {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    font-size: 13px;
+    border-bottom: 1px dashed #555;
+}
+
+/* 로그 성공 / 실패 색상 */
+.log-container tbody tr td:first-child {
+    font-weight: bold;
+}
+.log-container tbody tr td:first-child:contains('성공') {
+    color: #00ff00;
+}
+.log-container tbody tr td:first-child:contains('실패') {
+    color: #ff4d4d;
+}
+
+/* 스크롤 스타일 */
+.log-container::-webkit-scrollbar {
+    width: 6px;
+}
+.log-container::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 3px;
+}

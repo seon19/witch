@@ -36,4 +36,20 @@ public class Inventory {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "potionid")
     private Potion potion;
+    
+    public Inventory() {}
+
+    // 🔽 포션 인벤토리용 생성자
+    public Inventory(Member member, Potion potion, Integer quantity) {
+        this.member = member;
+        this.potion = potion;
+        this.quantity = quantity;
+    }
+
+    // 🔽 재료 인벤토리용 생성자 (있으면 편리)
+    public Inventory(Member member, Material material, Integer quantity) {
+        this.member = member;
+        this.material = material;
+        this.quantity = quantity;
+    }
 }

@@ -41,6 +41,6 @@ public class CraftLog {
 	    private Member member;
 	    
 	    @ManyToOne(fetch = FetchType.LAZY)
-	    @JoinColumn(name = "potionid", nullable = false)
+	    @JoinColumn(name = "potionid")
 	    private Potion potion;
 }

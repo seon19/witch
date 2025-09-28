@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>제작 로그</title>
+</head>
+<body>
+<div class="log-container" id="craftLogList" th:fragment="craftLogList">
+    <h3>제작 일지</h3>
+    <p class="log-note">※ 최근 기준 20개까지 조회 가능합니다.</p>
+    <table>
+        <tbody>
+            <tr th:if="${#lists.isEmpty(list)}">
+                <td colspan="3">제작 기록이 없습니다.</td>
+            </tr>
+            <tr th:each="log : ${list}">
+                <td th:text="${log.result}"></td>
+                <td th:text="${log.potion != null ? log.potion.potionName : '-'}"></td>
+                <td th:text="${#temporals.format(log.createTime, 'yyyy-MM-dd HH:mm')}"></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

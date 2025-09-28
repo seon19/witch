@@ -198,7 +198,7 @@ body {
 /* 맛 */
 .potion-material {
     font-size: 15px;
-    color: #5a3e2b; /* 은은한 갈색 */
+    color: #5a3e2b; 
     margin: 6px 0;
     padding-left: 6px;
 }
@@ -206,11 +206,11 @@ body {
 /* 맛 설명 */
 .potion-flavor {
     font-size: 15px;
-    color: #5a3e2b;             /* 은은한 갈색 */
+    color: #5a3e2b;             
     margin: 8px 0;
     padding: 6px 10px;
-    background: rgba(245, 233, 210, 0.6);  /* 종이 위에 옅은 얼룩 같은 배경 */
-    border-left: 4px solid #c8a97e;        /* 연갈색 장식선 */
+    background: rgba(245, 233, 210, 0.6);  
+    border-left: 4px solid #c8a97e;       
     border-radius: 4px;
     box-shadow: inset 1px 1px 3px rgba(0,0,0,0.08);
     line-height: 1.5;
@@ -222,7 +222,7 @@ body {
 .potion-material-tooltip {
     display: none;
     position: absolute;
-    background: linear-gradient(180deg, #fffdf7 0%, #f9f2e7 100%); /* 종이 느낌의 부드러운 그라데이션 */
+    background: linear-gradient(180deg, #fffdf7 0%, #f9f2e7 100%); 
     border: 1px solid #d4c292;
     border-radius: 8px;
     padding: 8px 12px;
@@ -286,7 +286,7 @@ body {
 }
 
 .material-item:hover .material-img {
-    transform: scale(1.2); /* 재료 아이콘 hover 확대 */
+    transform: scale(1.2); 
 }
 
 /* 페이징 */

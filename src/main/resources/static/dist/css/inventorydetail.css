@@ -1,63 +1,49 @@
-/*상세보기*/
-.inventory-detail {
-  position: fixed;
-  top: 650px;
-  left: 338px;                
-  width: 260px;      
-  height: 200px;        
-  background-color: #D9D9D9;      
-  padding: 20px 15px;
-  color: white;              
-}
-
-/* 로그 영역 */
-.log-container {
-  position: fixed;
-  top: 318px;
-  right: 250px;                
-  width: 260px;      
-  height: 320px;        
-  background-color: #D9D9D9;      
-  padding: 20px 15px;
-  color: white;              
-}
-
-/* 인벤토리 상세보기 */
+/* ===== 인벤토리 상세보기 ===== */
 .inventory-detail {
   position: fixed;
   top: 650px;
   left: 338px;
   width: 280px;
   min-height: 220px;
-  background: #f5f0e6; /* 인벤토리 배경 톤과 맞춤 */
-  border: 2px solid #4b3f2f;
+  background: #2b1b3a; /* 진한 보라 배경 */
+  border: 2px solid #a86bff; /* 보라 테두리 */
   border-radius: 12px;
   padding: 16px;
   box-sizing: border-box;
-  color: #2c2c2c;
+  color: #f2e8dc; /* 밝은 크림 글자 */
   font-size: 14px;
   overflow-y: auto;
+  box-shadow: 0 0 10px rgba(168,107,255,0.5); /* 입체감 */
 }
 
-/* 상세보기 안쪽 */
+/* ===== 상세보기 제목 ===== */
 .inventory-detail h3 {
   font-size: 1.2rem;
   font-weight: bold;
   margin-bottom: 8px;
-  color: #000;
-  border-bottom: 1px solid #b8a68c;
+  color: #ffd700; /* 금색 포인트 */
+  border-bottom: 1px solid #a86bff;
   padding-bottom: 4px;
 }
 
+.log-note {
+    font-size: 12px;
+    color: #cccccc;
+    text-align: center;
+    margin: 4px 0 8px 0;
+}
+
+/* ===== 상세보기 내용 ===== */
 .inventory-detail p {
   margin: 6px 0;
   line-height: 1.4;
+  color: #f2e8dc; /* 밝은 글자 */
 }
 
-/* 수량 표시 강조 */
+/* 수량 등 강조 */
 .inventory-detail p span {
   font-weight: bold;
-  color: #7b3f00;
+  color: #ffda70; /* 밝은 금색 강조 */
 }
 
 /* 아이템 없을 때 */
@@ -66,9 +52,7 @@
   justify-content: center;
   align-items: center;
   height: 100%;
-  color: #777;
+  color: #aaa; /* 연한 회색 */
   font-size: 0.95rem;
   font-style: italic;
 }
-
-

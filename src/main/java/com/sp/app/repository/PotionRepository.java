@@ -1,5 +1,7 @@
 package com.sp.app.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,4 +28,6 @@ public interface PotionRepository extends JpaRepository<Potion, Long> {
 	public Potion findByNextName(@Param("potionId") long potionId, @Param("kwd") String kwd);
 	@Query(value = "SELECT * FROM potion WHERE potionId<:potionId AND (subject LIKE '%'||:kwd||'%' OR content LIKE '%'||:kwd||'%') ORDER BY potionId DESC FETCH FIRST 1 ROWS ONLY", nativeQuery = true)
 	public Potion findByNextAll(@Param("potionId") long potionId, @Param("kwd") String kwd);
-}
+	
+	public Optional<Potion> findByFirstMaterial_MaterialIdAndSecondMaterial_MaterialId(Long firstMaterialId, Long secondMaterialId);
+}	

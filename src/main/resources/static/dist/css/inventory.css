@@ -1,56 +1,61 @@
-/* 인벤토리 전체 */
+/* ===== 인벤토리 전체 ===== */
 .inventory-wrapper {
     margin-top: 20px;
     display: flex;
     justify-content: center;
 }
 
-/* 인벤토리 컨테이너 */
+/* ===== 인벤토리 컨테이너 ===== */
 .inventory-container {
-  position: fixed;
-  top: 210px;
-  left: 338px;
-  width: 280px;
-  height: 380px;
-  background: #f2e8dc;
-  display: flex;
-  flex-direction: column;
-  font-size: 10px;
-  color: #111;
-  overflow-y: auto;
+    position: fixed;
+    top: 210px;
+    left: 338px;
+    width: 280px;
+    height: 380px;
+    background: #2b1b3a;
+    border: 2px solid #a86bff;
+    display: flex;
+    flex-direction: column;
+    font-size: 10px;
+    color: #f2e8dc; 
+    overflow-y: auto;
+    box-shadow: 0 0 10px rgba(168,107,255,0.6);
 }
 
-/* 탭 */
+/* ===== 인벤토리 상단 탭 ===== */
 .inventory-tabs {
     display: flex;
+    border-bottom: 2px solid #a86bff; 
 }
 
 .inventory-tabs button {
     flex: 1;
-    padding: 6px 0;
+    padding: 8px 0;
     border: none;
-    background: #ccc;
+    background: #3b1f5c;
+    color: #f2e8dc; 
     cursor: pointer;
     font-weight: bold;
+    border-radius: 4px 4px 0 0; 
+    margin-right: 2px;
+    transition: all 0.2s;
+}
+
+.inventory-tabs button:last-child {
+    margin-right: 0;
+}
+
+.inventory-tabs button:hover {
+    background: #5b3fa5; 
 }
 
 .inventory-tabs button.active {
-    background: #fff;
-    border-bottom: 2px solid #fff;
+    background: #a86bff;
+    color: #ffd700; 
+    border-bottom: 3px solid #ffd700; 
 }
 
-/* 카테고리 */
-.inventory-container .category-title {
-    text-align: center;
-    padding: 5px 0;
-    background: #e5e5e5;
-    font-size: 11px;
-    font-weight: bold;
-    border-top: 2px solid #111;
-    border-bottom: 2px solid #111;
-}
-
-/* 탭 */
+/* ===== 카테고리 내부 탭 ===== */
 .inventory-container .tabs {
     display: flex;
 }
@@ -59,17 +64,36 @@
     flex: 1;
     padding: 6px 0;
     border: none;
-    background: #ccc;
+    background: #3b1f5c;
+    color: #f2e8dc;
     cursor: pointer;
     font-weight: bold;
-    border-left: 2px solid #111;
+    border-left: 2px solid #2a1440;
+    transition: all 0.2s;
+}
+
+.inventory-container .tabs button:first-child {
+    border-left: none;
 }
 
 .inventory-container .tabs button.active {
-    background: #fff;
+    background: #a86bff;
+    color: #ffd700;
 }
 
-/* 인벤토리 리스트: 그리드 적용 */
+/* ===== 카테고리 ===== */
+.inventory-container .category-title {
+    text-align: center;
+    padding: 5px 0;
+    background: rgba(30, 30, 30, 0.8); 
+    color: #ffd700; 
+    font-size: 11px;
+    font-weight: bold;
+    border-top: 2px solid #a86bff;
+    border-bottom: 2px solid #a86bff;
+}
+
+/* ===== 인벤토리 리스트: 그리드 적용 ===== */
 .inventory-list {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -79,21 +103,23 @@
     max-height: 100%; 
 }
 
-/* 아이템 */
+/* ===== 아이템 ===== */
 .inventory-item {
     display: flex;
     justify-content: center;
 }
 
 .item-box {
-  width: 100%;
-  aspect-ratio: 1/1;
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 2px solid #111;
-  background: #e5d9c8;
+    width: 100%;
+    aspect-ratio: 1/1;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid #a86bff; 
+    background: #3a1f5c;
+    border-radius: 4px;
+    transition: transform 0.2s, background 0.2s;
 }
 
 .item-box img {
@@ -103,29 +129,29 @@
 
 .item-box:hover {
     transform: scale(1.05);
-    background-color: #aaa;
+    background-color: #5b3fa5; 
 }
 
-/* 아이템 수량 */
+/* ===== 아이템 수량 ===== */
 .item-quantity {
     position: absolute;
     bottom: 2px;
-    right: 4px;
-    font-size: 12px;
-    background: #111;
-    color: #f2e8dc;
-    padding: 5px 7px;
-    border-radius: 0;
+    right: 3px;
+    font-size: 10px;
+    background: #1f0f2a;
+    color: #ffd700;
+    padding: 3px 5px;
+    border-radius: 3px;
+    border: 2px solid #a86bff;
 }
 
-
-/* 비었을 때 */
+/* ===== 비었을 때 ===== */
 .empty-inventory {
     display: flex;
     justify-content: center; 
     align-items: center;  
     height: 100%;          
-    color: #666;
+    color: #aaa;
     font-size: 14px;        
     text-align: center;     
 }

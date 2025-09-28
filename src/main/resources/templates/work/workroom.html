@@ -8,6 +8,8 @@
 	<link rel="stylesheet" th:href="@{/dist/css/inventory.css}" type="text/css">
 	<link rel="stylesheet" th:href="@{/dist/css/inventorydetail.css}" type="text/css">
 	<link rel="stylesheet" th:href="@{/dist/css/craftPotion.css}" type="text/css">
+	<link rel="stylesheet" th:href="@{/dist/css/craftlog.css}" type="text/css">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=wand_stars" />
 	
 	</head>
 	<body>
@@ -32,20 +34,43 @@
 				<button class="spBtn4" th:onclick="|location.href='@{}'|">의뢰받기</button>
 			</div>
 		</div>
+		
+		<div class="header-content">
+		    <span class="material-symbols-outlined" th:text="'wand_stars ' + ${loginUser != null ? loginUser.name : 'Guest'} + '마녀의공방'"></span>
+		    
+		    <div class="wallet-container" th:if="${loginUser != null}">
+				<div class="balance-display">
+					<span th:text="'보유 코인 : ' + ${#numbers.formatInteger(loginUser.currentBalance, 0, 'COMMA')}"></span>
+				</div>
+			</div>
+		</div>
 
 		
 		<!-- 솥 버튼 -->
 		<div class="tool-container">
-		    <button type="button" class="soup-btn"><img src="/dist/images/솥1.png" alt="솥" width="100"></button>
-		</div>
-
+		    <button type="button" class="soup-btn" onclick="openCraftModal()"><img src="/dist/images/솥1.png" alt="솥" width="100"></button>
 		
-		<!-- 제작 버튼
-		<div class="create-container">
-		    <button type="button" id="craftPotionBtn"><img src="/dist/images/제작하기.png" alt="제작하기"></button>
+			<div id="craftModal" style="display:none;">
+			    <h3>포션 제조</h3>
+			    <select id="firstMaterial">
+			        <option value="">첫 번째 재료 선택</option>
+			        <!-- 서버에서 불러온 재료 option -->
+			    </select>
+			    <select id="secondMaterial">
+			        <option value="">두 번째 재료 선택</option>
+			    </select>
+			    <button onclick="makePotion()">제조하기</button>
+			    <button onclick="closeCraftModal()">닫기</button>
+			</div>
 		</div>
-		 -->
-
+				
+		<div class="result">
+			<p id="craftMessage">여기에 결과 메시지가 표시됩니다.</p>
+		</div>
+		
+		<div id="inventoryList">
+		    
+		</div>
 		
 		<!-- 인벤토리 리스트 -->
 		<div class="inventory-container">
@@ -57,7 +82,7 @@
 		</div>
 		  
 		<div class="category-title" id="inventoryCategory">
-		    <span th:text="${loginUser != null ? loginUser.name : 'Guest'} + '님의 인벤토리'"></span>
+		    <span class="user-info" th:text="${loginUser != null ? loginUser.name : 'Guest'} + '님의 인벤토리'"></span>
 		</div>
 		
 		  <div class="inventory-list" id="inventoryArea">
@@ -68,92 +93,189 @@
 	
 		<!-- 인벤토리 상세 -->
 		<div class="inventory-detail" id="inventoryDetail">
-		
 		</div>
 		
+		<div class="expbar-container">
+		    <span class="exp-level" th:text="${loginUser != null ? 'Lv.' + loginUser.currentLevel: 'Guest'}"></span>
+		    <div class="expbar-bg">
+		        <div class="expbar-fill" 
+		             th:style="'width:' + (${loginUser != null ? loginUser.currentExp : 0} / 1000 * 100) + '%;'">
+		        </div>
+		        <div class="expbar-inside">
+		            <span class="exp-text" th:text="${loginUser != null ? loginUser.currentExp + ' / 1000 ' : 'Guest'}"></span>
+		        </div>
+		    </div>
+		</div>
+
+		
+		<!-- 로그 -->
 		<div class="log-container" id="logContainer">
-			<p>재료</p>
+			<div th:replace="work/craftLog :: craftLogList"></div>
 		</div>
 	</div>
 	
-	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-	<script>
-	let currentPage = 1;
-	let totalPage = 1;
-	let currentType = "material";
-	let loading = false;
-	let selectedMaterials = [];
-	let selectedPotionId = 1;
-	
-	$(function(){
-	    loadInventory(1, currentType);
-	
-	    $("#inventoryTabs").on("click", "button", function(){
-	        $("#inventoryTabs button").removeClass("active");
-	        $(this).addClass("active");
-	
-	        currentType = $(this).data("type");
-	        currentPage = 1;
-	        $("#inventoryArea").empty();
-	        loadInventory(currentPage, currentType);
-	    });
-	
-	    $(window).on("scroll", function(){
-	        if(loading) return;
-	        if($(window).scrollTop() + $(window).height() >= $(document).height() - 100){
-	            if(currentPage < totalPage){
-	                currentPage++;
-	                loadInventory(currentPage, currentType);
-	            }
-	        }
-	    });
-	});
-	
-	function loadInventory(page, schType){
-	    loading = true;
-	    $.ajax({
-	        url: "/work/inventoryList",
-	        type: "GET",
-	        data: { page: page, schType: schType },
-	        success: function(fragment){
-	            if(page === 1){
-	            	let $fragment = $(fragment).children();
-	            	$("#inventoryArea").html($fragment);
-	            } else {
-	                $("#inventoryArea").append(fragment);
-	            }
-	
-	            totalPage = $("#inventoryArea").find("#totalPageVal").val() || totalPage;
-	            loading = false;
-	        },
-	        error: function(){
-	            alert("인벤토리를 불러오는 데 실패했습니다.");
-	            loading = false;
-	        }
-	    });
-	}
-	
-	// 아이템 클릭 시 상세보기 Ajax
-	$(document).on("click", ".inventory-item", function () {
-	    let inventoryId = $(this).data("id");
-	    let page = currentPage;
-	    let schType = currentType;
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+let currentPage = 1;
+let totalPage = 1;
+let currentType = "material";
+let loading = false;
 
-	    $.ajax({
-	        url: "/work/inventoryDetail/" + inventoryId,
-	        type: "GET",
-	        data: { page: page, schType: schType },
-	        success: function (fragment) {
-	            $("#inventoryDetail").html(fragment); 
-	        },
-	        error: function () {
-	            alert("상세 정보를 불러오는 데 실패했습니다.");
-	        }
-	    });
-	});
-	
+$(function () {
+    // 첫 로딩 시 인벤토리 불러오기
+    loadInventory(1, currentType);
+    loadCraftLog(1);
 
-	
-	</script>
-	</body>
-	</html>
+    // 탭 전환 이벤트
+    $("#inventoryTabs").on("click", "button", function () {
+        $("#inventoryTabs button").removeClass("active");
+        $(this).addClass("active");
+
+        currentType = $(this).data("type");
+        currentPage = 1;
+        $("#inventoryArea").empty();
+        loadInventory(currentPage, currentType);
+    });
+
+    // 무한 스크롤 이벤트
+    $(window).on("scroll", function () {
+        if (loading) return;
+        if ($(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
+            if (currentPage < totalPage) {
+                currentPage++;
+                loadInventory(currentPage, currentType);
+            }
+        }
+    });
+
+    // 페이지 로딩 시 재료 목록 불러오기
+    loadMaterials();
+});
+
+// 인벤토리 로딩
+function loadInventory(page, schType) {
+    loading = true;
+    $.ajax({
+        url: "/work/inventoryList",
+        type: "GET",
+        data: { page: page, schType: schType },
+        success: function (fragment) {
+            if (page === 1) {
+                let $fragment = $(fragment).children();
+                $("#inventoryArea").html($fragment);
+            } else {
+                $("#inventoryArea").append(fragment);
+            }
+
+            totalPage = $("#inventoryArea").find("#totalPageVal").val() || totalPage;
+            loading = false;
+        },
+        error: function () {
+            alert("인벤토리를 불러오는 데 실패했습니다.");
+            loading = false;
+        }
+    });
+}
+
+// 아이템 클릭 시 상세보기 Ajax
+$(document).on("click", ".inventory-item", function () {
+    let inventoryId = $(this).data("id");
+    let page = currentPage;
+    let schType = currentType;
+
+    $.ajax({
+        url: "/work/inventoryDetail/" + inventoryId,
+        type: "GET",
+        data: { page: page, schType: schType },
+        success: function (fragment) {
+            $("#inventoryDetail").html(fragment);
+        },
+        error: function () {
+            alert("상세 정보를 불러오는 데 실패했습니다.");
+        }
+    });
+});
+
+// 재료 목록 불러오기
+function loadMaterials() {
+    fetch("/work/materials")
+        .then(res => res.json())
+        .then(data => {
+            const first = document.getElementById("firstMaterial");
+            const second = document.getElementById("secondMaterial");
+            first.innerHTML = "<option value=''>첫 번째 재료 선택</option>";
+            second.innerHTML = "<option value=''>두 번째 재료 선택</option>";
+            data.forEach(m => {
+                first.add(new Option(m.material.materialName, m.material.materialId));
+                second.add(new Option(m.material.materialName, m.material.materialId));
+            });
+        });
+}
+
+// 포션 제작
+function makePotion() {
+    const first = document.getElementById("firstMaterial").value;
+    const second = document.getElementById("secondMaterial").value;
+
+    if (!first || !second) {
+        showMessage("재료를 모두 선택하세요!", "error");
+        return;
+    }
+
+    fetch("/work/craftPotion", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `firstMaterialId=${first}&secondMaterialId=${second}`
+    })
+        .then(res => res.text())
+        .then(msg => {
+            showMessage(msg, msg.includes("성공") ? "success" : "error");
+            loadInventory(1, currentType);  
+            loadMaterials();    
+            loadCraftLog(1);
+            closeCraftModal();               
+        })
+        .catch(err => showMessage("포션 제작 중 오류가 발생했습니다.", "error"));
+}
+
+// 메시지 표시 함수
+function showMessage(text, type) {
+    const msgEl = document.getElementById("craftMessage");
+    msgEl.innerText = text;
+    msgEl.className = type; // CSS로 성공/실패 색상 지정 가능
+    msgEl.style.display = "block";
+
+    setTimeout(() => {
+        msgEl.style.display = "none";
+    }, 3000); // 3초 후 사라짐
+}
+
+// 모달 열기
+function openCraftModal() {
+    $("#craftModal").show();
+}
+
+// 모달 닫기
+function closeCraftModal() {
+    $("#craftModal").hide();
+}
+
+
+
+// 제작 로그 불러오기
+function loadCraftLog(page) {
+    $.ajax({
+        url: "/work/craftLog",
+        type: "GET",
+        data: { page: page },
+        success: function (fragment) {
+            $("#logContainer").html(fragment);
+        },
+        error: function () {
+            alert("제작 로그를 불러오는 데 실패했습니다.");
+        }
+    });
+}
+</script>
+</body>
+</html>

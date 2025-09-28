@@ -20,4 +20,8 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>{
 	  public Page<Inventory> findByMemberMemberId(Long memberId, Pageable pageable);
 	  public Page<Inventory> findByMemberMemberIdAndMaterialIsNotNull(Long memberId, Pageable pageable);
 	  public Page<Inventory> findByMemberMemberIdAndPotionIsNotNull(Long memberId, Pageable pageable);
+	  
+	  public Optional<Inventory> findByMemberMemberIdAndMaterialMaterialId(Long memberId, Long materialId);
+	  public Optional<Inventory> findByMemberMemberIdAndPotionPotionId(Long memberId, Long potionId);
+
 }
