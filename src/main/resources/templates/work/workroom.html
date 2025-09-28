@@ -16,7 +16,7 @@
 	
 	<div class="main-container">
 		<div class="title-container">
-			<span class="logo">위치 크래프트</span>
+			<span class="logo" th:onclick="|location.href='@{/main/home}'|">위치크래프트</span>
 			<button th:onclick="|location.href='@{/member/login}'|">로그아웃</button>
 		</div>
 	
@@ -36,7 +36,7 @@
 		</div>
 		
 		<div class="header-content">
-		    <span class="material-symbols-outlined" th:text="'wand_stars ' + ${loginUser != null ? loginUser.name : 'Guest'} + '마녀의공방'"></span>
+		    <span class="material-symbols-outlined" th:text="'wand_stars ' + ${loginUser != null ? loginUser.nickname : 'Guest'} + '마녀의공방'"></span>
 		    
 		    <div class="wallet-container" th:if="${loginUser != null}">
 				<div class="balance-display">
@@ -82,7 +82,7 @@
 		</div>
 		  
 		<div class="category-title" id="inventoryCategory">
-		    <span class="user-info" th:text="${loginUser != null ? loginUser.name : 'Guest'} + '님의 인벤토리'"></span>
+		    <span class="user-info" th:text="${loginUser != null ? loginUser.nickname : 'Guest'} + '님의 인벤토리'"></span>
 		</div>
 		
 		  <div class="inventory-list" id="inventoryArea">
