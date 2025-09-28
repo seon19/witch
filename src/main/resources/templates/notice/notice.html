@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>공지사항</title>
+  <link rel="stylesheet" th:href="@{/dist/css/notice.css}" type="text/css">
+  
+</head>
+<body>
+  <div class="page-bg"></div>
+
+  <div class="title-bar">
+    <span class="logo" th:onclick="|location.href='@{/main/home}'|">위치 크래프트</span>
+    <button class="page-btn" th:onclick="|location.href='@{/member/logout}'|">로그아웃</button>
+  </div>
+
+  <main class="notice-container">
+    <section class="notice-wrap">
+      <div class="notice-content">
+		<aside class="left-col">
+		  <a class="arrow up disabled" id="btnUp"></a>
+		  <ul class="notice-list" id="noticeList"></ul>
+		  <a class="arrow down disabled" id="btnDown"></a>
+		</aside>
+        <article class="detail" id="detail">
+          <div class="meta" id="dDate">-</div>
+          <h2 id="dTitle"></h2>
+          <div class="body" id="dBody"></div>
+          <div class="author">from.<span id="dWriter"></span></div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+<script>
+  const PAGE_SIZE = 3;
+  let titles = [];
+  let start = 0;
+  let selectedId = null;
+
+  document.addEventListener('DOMContentLoaded', init);
+
+  async function init() {
+    try {
+      await loadTitles();
+      if (titles.length) await loadDetail(titles[0].noticeId);
+      document.getElementById('btnUp').addEventListener('click', () => move(-1));
+      document.getElementById('btnDown').addEventListener('click', () => move(1));
+    } catch (e) {
+      console.error(e);
+      alert('공지 불러오기에 실패했습니다.');
+    }
+  }
+
+  async function loadTitles() {
+    const res = await fetch('/notice/titles', { headers: { Accept: 'application/json' } });
+    if (!res.ok) throw new Error('titles 응답 오류');
+    titles = await res.json();
+    start = 0;
+    renderLeft();
+  }
+
+  function renderLeft() {
+    const list = document.getElementById('noticeList');
+    list.innerHTML = '';
+
+    const slice = titles.slice(start, start + PAGE_SIZE);
+    slice.forEach(t => {
+      const li = document.createElement('li');
+      li.className = 'notice-item' + (t.noticeId === selectedId ? ' active' : '');
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.style.all = 'unset';     
+      btn.style.display = 'block';
+      btn.style.width = '100%';
+      btn.textContent = t.noticeName || '(제목 없음)';
+      btn.addEventListener('click', () => loadDetail(t.noticeId));
+
+      li.appendChild(btn);
+      list.appendChild(li);
+    });
+
+    updateArrows();
+    highlightSelected();
+  }
+
+  function updateArrows() {
+    const up = document.getElementById('btnUp');
+    const down = document.getElementById('btnDown');
+    (start > 0) ? up.classList.remove('disabled') : up.classList.add('disabled');
+    (start + PAGE_SIZE < titles.length) ? down.classList.remove('disabled') : down.classList.add('disabled');
+  }
+
+  function move(dir) {
+    const next = start + dir * PAGE_SIZE;
+    start = Math.max(0, Math.min(next, Math.max(0, titles.length - PAGE_SIZE)));
+    renderLeft();
+  }
+
+  async function loadDetail(id) {
+    selectedId = id;
+    highlightSelected();
+
+    const res = await fetch(`/notice/${id}`, { headers: { Accept: 'application/json' } });
+    if (!res.ok) throw new Error('detail 응답 오류');
+    const d = await res.json();
+    renderDetail(d);
+  }
+
+  function renderDetail(d = {}) {
+    document.getElementById('dDate').textContent   = formatDate(d.noticeDate);
+    document.getElementById('dTitle').textContent  = d.noticeName || '공지 제목';
+    document.getElementById('dBody').textContent   = d.noticeContent || '';
+    document.getElementById('dWriter').textContent = d.writerName || '운영자';
+    highlightSelected();
+  }
+
+  function highlightSelected() {
+    document.querySelectorAll('.notice-item').forEach(li => li.classList.remove('active'));
+    const found = Array.from(document.querySelectorAll('.notice-item button')).find(
+      b => (titles.find(t => t.noticeId === selectedId)?.noticeName || '') === b.textContent.trim()
+    );
+    if (found) found.parentElement.classList.add('active');
+  }
+
+  function formatDate(v) {
+    if (!v) return '';
+    const d = new Date(v);
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+</script>
+</body>
+</html>
