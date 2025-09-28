@@ -24,36 +24,46 @@
 		<div class="table-container">
 			<form th:action="@{/admin/orders/{mode}(mode=${mode})}" name="purchaseForm" method="post">
 				<input type="hidden" name="itemId">
+				
+				<input type="hidden" name="purchaseId" th:if="${mode == 'purchaseUpdate'}" th:value="${dto.purchaseId}">
+				<input type="hidden" name="page" th:if="${mode == 'purchaseUpdate'}" th:value="${page}">
+
 				<table>
 					<tr>
 						<td>아이템 종류</td>
 						<td>
-							<label><input type="radio" name="itemType" value="material" checked> 재료</label>
-							<label style="margin-left: 10px;"><input type="radio" name="itemType" value="potion"> 포션</label>
+							<label><input type="radio" name="itemType" value="material" 
+								th:checked="${dto == null or dto.material != null}"
+								th:disabled="${mode == 'purchaseUpdate'}"> 재료</label>
+							<label style="margin-left: 10px;"><input type="radio" name="itemType" value="potion"
+								th:checked="${dto != null and dto.potion != null}"
+								th:disabled="${mode == 'purchaseUpdate'}"> 포션</label>
 						</td>
 					</tr>
 					
-					<tr id="material-select-row">
+					<tr id="material-select-row" th:style="${dto != null and dto.potion != null ? 'display: none;' : ''}">
 						<td>재료 선택</td>
 						<td>
-							<select name="itemId_material" id="materialSelect" class="item-select">
+							<select name="itemId_material" id="materialSelect" class="item-select" th:disabled="${mode == 'purchaseUpdate'}">
 								<option value="">--- 재료를 선택하세요 ---</option>
 								<th:block th:each="m : ${materialList}">
 									<option th:value="${m.materialId}" th:text="${m.materialName}"
-									    th:disabled="${registeredMaterialIds.contains(m.materialId)}"></option>
+										th:selected="${dto != null and dto.material != null and m.materialId == dto.material.materialId}"
+									    th:disabled="${registeredMaterialIds.contains(m.materialId) and (dto?.material == null or m.materialId != dto.material.materialId)}"></option>
 								</th:block>
 							</select>
 						</td>
 					</tr>
 
-					<tr id="potion-select-row" style="display: none;">
+					<tr id="potion-select-row" th:style="${dto == null or dto.material != null ? 'display: none;' : ''}">
 						<td>포션 선택</td>
 						<td>
-							<select name="itemId_potion" id="potionSelect" class="item-select">
+							<select name="itemId_potion" id="potionSelect" class="item-select" th:disabled="${mode == 'purchaseUpdate'}">
 								<option value="">--- 포션을 선택하세요 ---</option>
 								<th:block th:each="p : ${potionList}">
 									<option th:value="${p.potionId}" th:text="${p.potionName}"
-									    th:disabled="${registeredPotionIds.contains(p.potionId)}"></option>
+										th:selected="${dto != null and dto.potion != null and p.potionId == dto.potion.potionId}"
+									    th:disabled="${registeredPotionIds.contains(p.potionId) and (dto?.potion == null or p.potionId != dto.potion.potionId)}"></option>
 								</th:block>
 							</select>
 						</td>
@@ -61,44 +71,69 @@
 				</table>
 
 				<div id="item-info-area" style="display: none;">
-					</div>
+				</div>
 
 				<h3 style="padding: 1rem 1rem 0;">구매 정보 입력</h3>
 				<table>
 					 <tr>
 						<td>구매 가격</td>
-						<td><input type="text" name="purchasePrice" placeholder="구매 가격을 숫자로 입력하세요."></td>
+						<td><input type="text" name="purchasePrice" th:value="${dto?.purchasePrice}" placeholder="구매 가격을 숫자로 입력하세요."></td>
 					</tr>
 					<tr>
 						<td>구매 여부</td>
 						<td>
-							<label><input type="radio" name="isAvailable" value="true" checked> 구매</label>
-							<label style="margin-left: 10px;"><input type="radio" name="isAvailable" value="false"> 구매 중지</label>
+							<label><input type="radio" name="isAvailable" value="true" th:checked="${dto == null or dto.isAvailable}"> 구매</label>
+							<label style="margin-left: 10px;"><input type="radio" name="isAvailable" value="false" th:checked="${dto != null and !dto.isAvailable}"> 구매 중지</label>
 						</td>
 					</tr>
 				</table>
 
 				<div class="form-buttons">
-				    <button type="button" class="btn btn-primary" onclick="sendOk();">등록 완료</button>
-				    <button type="button" class="btn btn-secondary" th:onclick="|location.href='@{/admin/orders/purchaseList}'|">등록 취소</button>
+				    <button type="button" class="btn btn-primary" onclick="sendOk();" th:text="${mode=='purchaseWrite'?'등록 완료':'수정 완료'}"></button>
+				    <button type="button" class="btn btn-secondary" th:onclick="|location.href='@{/admin/orders/purchaseList}'|" th:text="${mode=='purchaseWrite'?'등록 취소':'목록으로'}"></button>
 				</div>
 			</form>
 		</div>		
 	</div>
 </div>
 
-<script type="text/javascript">
+<script type="text/javascript" th:inline="javascript">
+/*<![CDATA[*/
+
+const mode = /*[[${mode}]]*/ 'purchaseWrite';
+const dto = /*[[${dto}]]*/ null;
+
+// 페이지 로드 시 수정 모드이면 선택된 아이템 정보를 바로 표시
+document.addEventListener('DOMContentLoaded', function() {
+    if (mode === 'purchaseUpdate' && dto) {
+        let itemType;
+        let itemId;
+
+        if(dto.material) {
+            itemType = 'material';
+            itemId = dto.material.materialId;
+        } else if(dto.potion) {
+            itemType = 'potion';
+            itemId = dto.potion.potionId;
+        }
+
+        if(itemType && itemId) {
+            fetchItemInfo(itemType, itemId);
+        }
+    }
+});
+
+
 document.addEventListener('DOMContentLoaded', function() {
     const itemTypeRadios = document.querySelectorAll('input[name="itemType"]');
     const materialRow = document.getElementById('material-select-row');
     const potionRow = document.getElementById('potion-select-row');
     const itemSelects = document.querySelectorAll('.item-select');
-    const infoArea = document.getElementById('item-info-area');
-
+    
     itemTypeRadios.forEach(radio => {
         radio.addEventListener('change', function(e) {
             const type = e.target.value;
-            infoArea.style.display = 'none'; 
+            document.getElementById('item-info-area').style.display = 'none'; 
             itemSelects.forEach(sel => sel.value = ''); 
 
             if (type === 'material') {
@@ -115,67 +150,83 @@ document.addEventListener('DOMContentLoaded', function() {
         select.addEventListener('change', function(e) {
             const itemId = e.target.value;
             const itemType = document.querySelector('input[name="itemType"]:checked').value;
-
-            if (!itemId) {
-                infoArea.style.display = 'none';
-                return;
+            if (itemId) {
+                fetchItemInfo(itemType, itemId);
+            } else {
+            	document.getElementById('item-info-area').style.display = 'none';
             }
-
-            const apiUrl = `/admin/orders/api/${itemType}/${itemId}`;
-
-            fetch(apiUrl)
-                .then(response => response.ok ? response.json() : Promise.reject('Not found'))
-                .then(data => {
-                    let previewHtml = '<h3>선택된 아이템 정보</h3><table>';
-                    
-                    if(itemType === 'material') {
-                        previewHtml += `
-                            <tr><td>이미지</td><td><img src="/uploads/material/${data.materialPhoto}" style="max-width:100px;"></td></tr>
-                            <tr><td>이름</td><td>${data.materialName}</td></tr>
-                            <tr><td>설명</td><td>${data.materialDescription}</td></tr>
-                            <tr><td>기존 가격</td><td>${data.materialPrice}</td></tr>`;
-                    } else if (itemType === 'potion') {
-                        previewHtml += `
-                            <tr><td>이미지</td><td><img src="/uploads/potion/${data.potionPhoto}" style="max-width:100px;"></td></tr>
-                            <tr><td>이름</td><td>${data.potionName}</td></tr>
-                            <tr><td>설명</td><td>${data.potionDescription}</td></tr>
-                            <tr><td>레벨</td><td>${data.potionLevel}</td></tr>
-                            <tr><td>첫번째 재료</td><td>${data.firstMaterial.materialName}</td></tr>
-                            <tr><td>두번째 재료</td><td>${data.secondMaterial.materialName}</td></tr>`;
-                    }
-
-                    previewHtml += '</table>';
-                    infoArea.innerHTML = previewHtml;
-                    infoArea.style.display = 'block';
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    infoArea.style.display = 'none';
-                });
         });
     });
 });
 
-function sendOk() {
-    const f = document.purchaseForm;
-    const itemType = f.itemType.value;
-    let selectedElement;
-
-    if (itemType === 'material') {
-    	selectedElement = document.getElementById('materialSelect');
-    } else {
-    	selectedElement = document.getElementById('potionSelect');
-    }
-
-    if (!selectedElement.value) {
-        alert('구매할 아이템을 선택해주세요.');
-        selectedElement.focus();
+function fetchItemInfo(itemType, itemId) {
+	const infoArea = document.getElementById('item-info-area');
+    if (!itemId) {
+        infoArea.style.display = 'none';
         return;
     }
+
+    const apiUrl = `/admin/orders/api/${itemType}/${itemId}`;
+
+    fetch(apiUrl)
+        .then(response => response.ok ? response.json() : Promise.reject('Not found'))
+        .then(data => {
+            let previewHtml = '<h3>선택된 아이템 정보</h3><table>';
+            
+            if(itemType === 'material') {
+                previewHtml += `
+                    <tr><td>이미지</td><td><img src="/uploads/material/${data.materialPhoto}" style="max-width:100px;"></td></tr>
+                    <tr><td>이름</td><td>${data.materialName}</td></tr>
+                    <tr><td>설명</td><td>${data.materialDescription}</td></tr>
+                    <tr><td>기존 가격</td><td>${data.materialPrice}</td></tr>`;
+            } else if (itemType === 'potion') {
+                previewHtml += `
+                    <tr><td>이미지</td><td><img src="/uploads/potion/${data.potionPhoto}" style="max-width:100px;"></td></tr>
+                    <tr><td>이름</td><td>${data.potionName}</td></tr>
+                    <tr><td>설명</td><td>${data.potionDescription}</td></tr>
+                    <tr><td>레벨</td><td>${data.potionLevel}</td></tr>
+                    <tr><td>첫번째 재료</td><td>${data.firstMaterial.materialName}</td></tr>
+                    <tr><td>두번째 재료</td><td>${data.secondMaterial.materialName}</td></tr>`;
+            }
+
+            previewHtml += '</table>';
+            infoArea.innerHTML = previewHtml;
+            infoArea.style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            infoArea.style.display = 'none';
+        });
+}
+
+function sendOk() {
+    const f = document.purchaseForm;
     
-    f.itemId.value = selectedElement.value;
+    if(mode === 'purchaseWrite') {
+	    const itemType = f.itemType.value;
+	    let selectedElement;
+	
+	    if (itemType === 'material') {
+	    	selectedElement = document.getElementById('materialSelect');
+	    } else {
+	    	selectedElement = document.getElementById('potionSelect');
+	    }
+	
+	    if (!selectedElement.value) {
+	        alert('구매할 아이템을 선택해주세요.');
+	        selectedElement.focus();
+	        return;
+	    }
+	    
+	    f.itemId.value = selectedElement.value;
+    }
     
     const purchasePrice = f.purchasePrice.value.trim();
+    if (!purchasePrice) {
+    	alert('구매 가격을 입력하세요.');
+        f.purchasePrice.focus();
+        return;
+    }
     const priceRegex = /^[0-9]+$/;
     if (!priceRegex.test(purchasePrice)) {
         alert('구매 가격은 숫자만 입력할 수 있습니다.');
@@ -183,15 +234,9 @@ function sendOk() {
         return;
     }
     
-    const isAvailable = f.isAvailable.value;
-    if (!isAvailable) {
-        alert('구매 여부를 선택해주세요.');
-        f.isAvailable.focus();
-        return;
-    }
-
     f.submit();
 }
+/*]]>*/
 </script>
 
 </body>
