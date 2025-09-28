@@ -23,5 +23,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>{
 	  
 	  public Optional<Inventory> findByMemberMemberIdAndMaterialMaterialId(Long memberId, Long materialId);
 	  public Optional<Inventory> findByMemberMemberIdAndPotionPotionId(Long memberId, Long potionId);
+	  
+	  Optional<Inventory> findByMember_MemberIdAndMaterial_MaterialId(Long memberId, Long materialId);
 
 }

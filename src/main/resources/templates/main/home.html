@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>위치 크래프트</title>
-
 <link rel="stylesheet" th:href="@{/dist/css/all.css}" type="text/css">
 <link rel="stylesheet" th:href="@{/dist/css/home.css}" type="text/css">
 </head>
@@ -38,6 +37,11 @@
 	            <span th:text="${#numbers.formatInteger(loginUser.currentBalance, 0, 'COMMA')}">1,000</span>
 	        </div>
 	    </div>
+
+	    <div id="questPanel" class="quest-panel">
+	      <div class="qp-title">진행중인 의뢰</div>
+	      <div id="qpList" class="qp-list"></div>
+	    </div>
 	</div>
 	
 	<div class="button-container">
@@ -68,70 +72,176 @@
 
 <script type="text/javascript">
 function openDailyRewardModal() {
-    const modal = document.getElementById('dailyRewardModal');
-    modal.style.display = 'flex';
-    
-    fetch('/main/dailyReward')
-        .then(response => response.json())
-        .then(data => {
-    const rewardContent = document.getElementById('rewardContent');
-    
-    if(data.error) {
-        rewardContent.innerHTML = `<div class="error"><p>${data.error}</p></div>`;
-        return;
-    }
-
-
-    const imagePath = `/uploads/material/${data.materialPhoto}`;
-
-    if (data.alreadyReceived) {
-        // 이미 받은 경우
+  const modal = document.getElementById('dailyRewardModal');
+  modal.style.display = 'flex';
+  fetch('/main/dailyReward')
+    .then(r => r.json())
+    .then(data => {
+      const rewardContent = document.getElementById('rewardContent');
+      if (data.error) { rewardContent.innerHTML = `<div class="error"><p>${data.error}</p></div>`; return; }
+      if (data.alreadyReceived) {
         rewardContent.innerHTML = `
-            <div class="reward-already">
-                <p>오늘 이미 보상을 받으셨습니다!</p>
-                <div class="received-item">
-                    <span class="material-name">${data.materialName} x${data.quantity}</span>
-                </div>
-                <p class="next-reward">내일 다시 방문해 주세요!</p>
-            </div>
-        `;
-    } else {
-        // 새로 받는 경우
+          <div class="reward-already">
+            <p>오늘 이미 보상을 받으셨습니다!</p>
+            <div class="received-item"><span class="material-name">${data.materialName} x${data.quantity}</span></div>
+            <p class="next-reward">내일 다시 방문해 주세요!</p>
+          </div>`;
+      } else {
         rewardContent.innerHTML = `
-            <div class="reward-new">
-                <p class="reward-text">축하합니다! 새로운 재료를 획득했습니다!</p>
-                <div class="new-item">
-                    <span class="material-name">${data.materialName} x${data.quantity}</span>
-                </div>
-                <div class="consecutive-days">
-                    <span>연속 접속: ${data.consecutiveDays}일</span>
-                </div>
-            </div>
-        `;
-    }
-})
-        .catch(error => {
-            console.error('일일보상 조회 오류:', error);
-            document.getElementById('rewardContent').innerHTML = `
-                <div class="error">
-                    <p>보상 정보를 불러오는데 실패했습니다.</p>
-                    <p>잠시 후 다시 시도해 주세요.</p>
-                </div>
-            `;
-        });
+          <div class="reward-new">
+            <p class="reward-text">축하합니다! 새로운 재료를 획득했습니다!</p>
+            <div class="new-item"><span class="material-name">${data.materialName} x${data.quantity}</span></div>
+            <div class="consecutive-days"><span>연속 접속: ${data.consecutiveDays}일</span></div>
+          </div>`;
+      }
+    }).catch(err => {
+      console.error(err);
+      document.getElementById('rewardContent').innerHTML =
+        `<div class="error"><p>보상 정보를 불러오는데 실패했습니다.</p><p>잠시 후 다시 시도해 주세요.</p></div>`;
+    });
+}
+function closeDailyRewardModal(){ document.getElementById('dailyRewardModal').style.display = 'none'; }
+window.addEventListener('click', (e) => {
+  const daily = document.getElementById('dailyRewardModal');
+  const reqm  = document.getElementById('reqModal');
+  if (e.target === daily) daily.style.display = 'none';
+  if (e.target === reqm)  reqm.classList.add('hidden');
+});
+
+let ongoing = [];
+let currentRequestListId = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadOngoing();
+  const qdBtn = document.getElementById('qdClaim');
+  if (qdBtn) qdBtn.addEventListener('click', () => claim(currentRequestListId));
+});
+
+async function loadOngoing() {
+  try {
+    const res = await fetch('/request/api/ongoing', { headers:{Accept:'application/json'} });
+    if (!res.ok) throw new Error(res.status);
+    ongoing = await res.json();
+    renderOngoingList();
+  } catch (e) {
+    console.error(e);
+    ongoing = [];
+    renderOngoingList();
+  }
 }
 
-function closeDailyRewardModal() {
-    document.getElementById('dailyRewardModal').style.display = 'none';
+function renderOngoingList() {
+  const box = document.getElementById('qpList');
+  box.innerHTML = '';
+  if (!ongoing || ongoing.length === 0) {
+    box.innerHTML = `<div class="qp-item" style="opacity:.8">진행중인 의뢰가 없습니다.</div>`;
+    return;
+  }
+  ongoing.forEach(q => {
+    const li = document.createElement('div');
+    li.className = 'qp-item';
+    const percent = Math.min(100, q.percent || 0);
+    li.innerHTML = `
+      <div class="qp-top">
+        <div class="qp-name" title="${escapeHtml(q.requestName || '')}"
+             onclick="openDetail(${q.requestListId})">
+          [Lv.${q.requestLevel}] ${escapeHtml(q.requestName || '')}
+        </div>
+        <div class="qp-btns">
+          <button class="qp-btn" onclick="openDetail(${q.requestListId})">자세히</button>
+          <button class="qp-btn" ${q.claimable ? '' : 'disabled'}
+                  onclick="claim(${q.requestListId})">보상받기</button>
+        </div>
+      </div>
+      <div class="qp-meta">${q.progressCount}/${q.progressGoal}</div>
+      <div class="qp-bar"><div class="qp-fill" style="width:${percent}%"></div></div>
+    `;
+    box.appendChild(li);
+  });
 }
 
-// 모달 외부 클릭시 닫기
-window.onclick = function(event) {
-    const modal = document.getElementById('dailyRewardModal');
-    if (event.target === modal) {
-        modal.style.display = 'none';
-    }
+async function openDetail(requestListId){
+  try{
+    const res = await fetch(`/request/api/${requestListId}`, { headers:{Accept:'application/json'} });
+    if(!res.ok) throw new Error(res.status);
+    const d = await res.json();
+
+    currentRequestListId = requestListId;
+
+    document.getElementById('qdLevel').textContent = d.requestLevel ? `Lv.${d.requestLevel}` : '';
+    document.getElementById('qdName').textContent  = d.requestName || '';
+    document.getElementById('qdDesc').textContent  = d.requestContent || '';
+    document.getElementById('qdClient').textContent= d.client || '';
+    document.getElementById('qdExp').textContent   = d.rewardExp ?? 0;
+    document.getElementById('qdGold').textContent  = d.rewardGold ?? 0;
+
+    const itemsHtml = (d.rewardItems && d.rewardItems.length)
+      ? d.rewardItems.map(i => `<span class="chip">${escapeHtml(i.materialName||'')} × ${i.qty||0}</span>`).join('')
+      : '<span class="chip" style="opacity:.7">아이템 없음</span>';
+    document.getElementById('qdItems').innerHTML = itemsHtml;
+
+    const qdBtn = document.getElementById('qdClaim');
+    qdBtn.disabled = !d.claimable;
+
+    document.getElementById('qdWrap').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }catch(e){
+    console.error(e);
+    alert('의뢰 정보를 불러오지 못했습니다.');
+  }
 }
+
+function closeQuestDetail(){
+  document.getElementById('qdWrap').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+async function claim(id){
+  const target = id ?? currentRequestListId;
+  if(!target) return;
+  try{
+    const res = await fetch(`/request/api/${target}/claim`, { method:'POST', headers:{Accept:'application/json'} });
+    if(!res.ok) throw new Error(await res.text());
+    await res.json();
+    alert('보상을 수령했습니다!');
+    closeQuestDetail();
+    loadOngoing(); 
+  }catch(e){
+    console.error(e);
+    alert('보상 수령에 실패했습니다.');
+  }
+}
+
+window.addEventListener('keydown', (ev)=>{ if(ev.key === 'Escape') closeQuestDetail(); });
+
+function escapeHtml(s){
+  return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 </script>
+
+<div id="qdWrap" class="qd-wrap" aria-hidden="true">
+  <div class="qd-backdrop" onclick="closeQuestDetail()"></div>
+  <div class="qd-modal" role="dialog" aria-modal="true">
+    <div class="qd-head">
+      <div>의뢰요약</div>
+      <button class="qd-x" type="button" onclick="closeQuestDetail()">×</button>
+    </div>
+    <div class="qd-body">
+      <div class="qd-title"><span id="qdLevel"></span> <span id="qdName"></span></div>
+      <div id="qdDesc" class="qd-desc"></div>
+      <div class="qd-client">from. <span id="qdClient"></span></div>
+      <div class="qd-reward">
+        <div class="row"><strong>경험치</strong>&nbsp;<span id="qdExp">0</span></div>
+        <div class="row"><strong>코인</strong>&nbsp;<span id="qdGold">0</span></div>
+        <div class="row" id="qdItems"></div>
+      </div>
+    </div>
+    <div class="qd-foot">
+      <button id="qdClaim" class="qd-claim" type="button" disabled>보상받기</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

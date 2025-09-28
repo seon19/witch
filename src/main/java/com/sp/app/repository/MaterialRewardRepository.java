@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sp.app.entity.MaterialReward;
@@ -20,4 +22,7 @@ public interface MaterialRewardRepository extends JpaRepository<MaterialReward, 
 	  @Modifying(clearAutomatically = true, flushAutomatically = true)
 	  @Transactional
 	  void deleteByRequest_RequestIdAndMaterial_MaterialId(Long requestId, Long materialId); // 단건 삭제
+	  
+	  @Query("select mr from MaterialReward mr join fetch mr.material where mr.request.requestId = :requestId")
+	  List<MaterialReward> findByRequestIdWithMaterial(@Param("requestId") Long requestId);
 }
