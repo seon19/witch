@@ -15,4 +15,10 @@ public interface RequestService {
     void addReward(Long requestId, Long materialId, int qty);
     void changeRewardQty(Long requestId, Long materialId, int qty);
     void removeReward(Long requestId, Long materialId);
+    
+    Long createWithTarget(Request req, Request.RequestItem requestItem, Long materialId, Long potionId);
+	void updateWithTarget(Request req, Request.RequestItem requestItem, Long materialId, Long potionId);
+	void setTargetMaterial(Long requestId, Long materialId);
+	void setTargetPotion(Long requestId, Long potionId);
+	boolean canDelete(Long requestId);
 }

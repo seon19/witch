@@ -29,6 +29,7 @@ public class UserRequestDTO {
     private int rewardExp;
     private int rewardGold;
     private int goalCount;
+    private Request.RequestItem requestItem;
 
     private List<RewardItemDto> rewardItems;
 

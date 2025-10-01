@@ -50,6 +50,38 @@
             <span class="info-label">의뢰인</span>
             <p class="info-value" th:text="${req.client}"></p>
           </div>
+          
+		<div class="info-item">
+		  <span class="info-label">의뢰 아이템</span>
+		
+		  <div class="info-value">
+		
+		    <span th:if="${req.requestItem == null}">선택되지 않음</span>
+		
+		    <div th:if="${req.requestItem != null and req.requestItem.name()=='MATERIAL'}"
+		         style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+
+		      <img th:if="${req.targetMaterial != null and req.targetMaterial.materialPhoto != null}"
+		           th:src="@{/uploads/material/{img}(img=${req.targetMaterial.materialPhoto})}"
+		           th:alt="${req.targetMaterial != null ? req.targetMaterial.materialName : '재료'}"
+		           style="width:32px;height:32px;object-fit:cover;border-radius:4px;image-rendering:pixelated;">
+		
+		      <span th:text="${req.targetMaterial != null ? req.targetMaterial.materialName : '(미지정)'}"></span>
+		    </div>
+		
+		    <div th:if="${req.requestItem != null and req.requestItem.name()=='POTION'}"
+		         style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+		
+		      <img th:if="${req.targetPotion != null and req.targetPotion.potionPhoto != null}"
+		           th:src="@{/uploads/potion/{img}(img=${req.targetPotion.potionPhoto})}"
+		           th:alt="${req.targetPotion != null ? req.targetPotion.potionName : '포션'}"
+		           style="width:32px;height:32px;object-fit:cover;border-radius:4px;image-rendering:pixelated;">
+		
+		      <span th:text="${req.targetPotion != null ? req.targetPotion.potionName : '(미지정)'}"></span>
+		    </div>
+		
+		  </div>
+		</div>
 
           <div class="info-item" th:if="${req.goalCount != null}">
             <span class="info-label">요구 개수</span>

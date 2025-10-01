@@ -6,6 +6,8 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.sp.app.entity.Inventory;
 import com.sp.app.entity.Material;
@@ -25,5 +27,9 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>{
 	  public Optional<Inventory> findByMemberMemberIdAndPotionPotionId(Long memberId, Long potionId);
 	  
 	  Optional<Inventory> findByMember_MemberIdAndMaterial_MaterialId(Long memberId, Long materialId);
-
-}
+	  @Query("select coalesce(sum(i.quantity), 0) from Inventory i where i.member.memberId = :memberId and i.material.materialId = :materialId")
+	    int sumMaterialQty(@Param("memberId") Long memberId, @Param("materialId") Long materialId);
+	  
+	  @Query("select coalesce(sum(i.quantity), 0) from Inventory i where i.member.memberId = :memberId and i.potion.potionId = :potionId")
+	    int sumPotionQty(@Param("memberId") Long memberId, @Param("potionId") Long potionId);
+	}

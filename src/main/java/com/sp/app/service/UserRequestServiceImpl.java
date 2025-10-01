@@ -99,9 +99,25 @@ public class UserRequestServiceImpl implements UserRequestService {
         List<RequestList> list = requestListRepository
                 .findTop3ByMember_MemberIdAndRequestStateOrderByStartRequestDateDesc(memberId, 0);
 
-        return list.stream()
-                .map(UserRequestDTO::ofList)
-                .collect(Collectors.toList());
+        return list.stream().map(rl -> {
+            int goal = rl.getProgressGoal() <= 0 ? 1 : rl.getProgressGoal(); // ✅ null 체크 제거
+            Integer countNow = resolveProgressFromInventory(rl.getMember().getMemberId(), rl.getRequest());
+            int progressCount = Math.min(goal, (countNow != null ? countNow : rl.getProgressCount())); // ✅ null 대신 현재값 사용
+            boolean done = progressCount >= goal;
+
+            return UserRequestDTO.builder()
+                    .requestId(rl.getRequest().getRequestId())
+                    .requestLevel(rl.getRequest().getRequestLevel())
+                    .requestName(rl.getRequest().getRequestName())
+                    .goalCount(goal)
+                    .requestListId(rl.getRequestListId())
+                    .progressCount(progressCount)
+                    .progressGoal(goal)
+                    .requestState(done ? 1 : rl.getRequestState())
+                    .percent((int) Math.floor(100.0 * progressCount / goal))
+                    .claimable(done)
+                    .build();
+        }).collect(Collectors.toList());
     }
 
     @Override
@@ -117,34 +133,40 @@ public class UserRequestServiceImpl implements UserRequestService {
         return UserRequestDTO.ofDetail(rl, rewards);
     }
 
+    @Override
+    @Transactional
     public void increaseProgress(Long requestListId, Long memberId, int step) {
-    	RequestList rl = requestListRepository
-    	        .findByRequestListIdAndMember_MemberId(requestListId, memberId)   
-    	        .orElseThrow(() -> new IllegalArgumentException("의뢰 진행 내역 없음"));
+        RequestList rl = requestListRepository
+                .findByRequestListIdAndMember_MemberId(requestListId, memberId)
+                .orElseThrow(() -> new IllegalArgumentException("의뢰 진행 내역 없음"));
 
-
-        int goal = Optional.ofNullable(rl.getProgressGoal()).filter(g -> g > 0).orElse(1);
-        int current = Optional.ofNullable(rl.getProgressCount()).orElse(0);
-
-        int newCount = Math.min(goal, Math.max(0, current + step)); 
-        rl.setProgressGoal(goal);
-        rl.setProgressCount(newCount);
-
-        if (newCount >= goal && rl.getRequestState() == 0) {
-            rl.setRequestState(1);
-            rl.setEndRequestDate(LocalDateTime.now());
+        if (hasTarget(rl.getRequest())) {
+            ensureUpToDateProgressFromInventory(rl); 
+        } else {
+            int goal = rl.getProgressGoal() <= 0 ? 1 : rl.getProgressGoal(); 
+            int current = rl.getProgressCount();                              
+            int newCount = Math.min(goal, Math.max(0, current + step));
+            rl.setProgressGoal(goal);
+            rl.setProgressCount(newCount);
+            if (newCount >= goal && rl.getRequestState() == 0) {
+                rl.setRequestState(1);
+                rl.setEndRequestDate(LocalDateTime.now());
+            }
+            requestListRepository.save(rl);
         }
-
-        requestListRepository.save(rl);
     }
 
     @Override
     @Transactional
     public UserRequestDTO claimReward(Long requestListId, Long memberId) {
-    	RequestList rl = requestListRepository
-    	        .findByRequestListIdAndMember_MemberId(requestListId, memberId)   
-    	        .orElseThrow(() -> new IllegalArgumentException("의뢰 진행 내역 없음"));
-        if (rl.getRequestState() != 1) { 
+        RequestList rl = requestListRepository
+                .findByRequestListIdAndMember_MemberId(requestListId, memberId)
+                .orElseThrow(() -> new IllegalArgumentException("의뢰 진행 내역 없음"));
+
+        if (hasTarget(rl.getRequest())) {
+            ensureUpToDateProgressFromInventory(rl);
+        }
+        if (rl.getRequestState() != 1) {
             throw new IllegalStateException("수령할 수 없는 상태입니다.");
         }
 
@@ -185,4 +207,53 @@ public class UserRequestServiceImpl implements UserRequestService {
 
         return UserRequestDTO.ofDetail(rl, rewards);
     }
+
+    private boolean hasTarget(Request r) {
+        if (r == null || r.getRequestItem() == null) return false;
+        switch (r.getRequestItem()) {
+            case MATERIAL: return r.getTargetMaterial() != null;
+            case POTION:   return r.getTargetPotion() != null;
+            default:       return false;
+        }
+    }
+
+    private Integer resolveProgressFromInventory(Long memberId, Request r) {
+        if (!hasTarget(r)) return null;
+
+        switch (r.getRequestItem()) {
+            case MATERIAL: {
+                Long mid = r.getTargetMaterial().getMaterialId();
+                return inventoryRepository
+                        .findByMember_MemberIdAndMaterial_MaterialId(memberId, mid)
+                        .map(Inventory::getQuantity)
+                        .orElse(0);
+            }
+            case POTION: {
+                Long pid = r.getTargetPotion().getPotionId();
+                return inventoryRepository
+                        .findByMemberMemberIdAndPotionPotionId(memberId, pid)
+                        .map(Inventory::getQuantity)
+                        .orElse(0);
+            }
+            default:
+                return null;
+        }
+    }
+
+    private void ensureUpToDateProgressFromInventory(RequestList rl) {
+        int goal = rl.getProgressGoal() <= 0 ? 1 : rl.getProgressGoal(); // ✅
+        Integer owned = resolveProgressFromInventory(rl.getMember().getMemberId(), rl.getRequest());
+        if (owned == null) return;
+
+        int newCount = Math.min(goal, Math.max(0, owned));
+        rl.setProgressGoal(goal);
+        rl.setProgressCount(newCount);
+
+        if (newCount >= goal && rl.getRequestState() == 0) {
+            rl.setRequestState(1);
+            rl.setEndRequestDate(LocalDateTime.now());
+        }
+        requestListRepository.save(rl);
+    }
+
 }

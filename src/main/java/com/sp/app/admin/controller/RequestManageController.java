@@ -23,9 +23,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.sp.app.admin.service.RequestListService;
 import com.sp.app.entity.Material;
 import com.sp.app.entity.MaterialReward;
+import com.sp.app.entity.Potion;
 import com.sp.app.entity.Request;
 import com.sp.app.repository.MaterialRepository;
 import com.sp.app.repository.MaterialRewardRepository;
+import com.sp.app.repository.PotionManageRepository;
 import com.sp.app.repository.RequestRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -35,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/admin/request")
 public class RequestManageController {
 
+    private final PotionManageRepository potionManageRepository;
     private final RequestRepository requestRepository;
     private final RequestListService requestListService;   
     private final MaterialRepository materialRepository;
@@ -116,10 +119,20 @@ public class RequestManageController {
     @Transactional
     public String write(
             @ModelAttribute Request req, 
+            @RequestParam(name = "materialId", required = false) Long materialId,   
+            @RequestParam(name = "potionId",   required = false) Long potionId, 
             @RequestParam(name = "rewardMaterialId", required = false) java.util.List<Long> rewardMaterialIds,
             @RequestParam(name = "rewardQty", required = false) java.util.List<Integer> rewardQtys,
             RedirectAttributes ra) {
 
+    	if (req.getRequestItem() == Request.RequestItem.MATERIAL) {
+            req.setTargetMaterial(materialId != null ? materialRepository.getReferenceById(materialId) : null);
+            req.setTargetPotion(null);
+        } else if (req.getRequestItem() == Request.RequestItem.POTION) {
+            req.setTargetPotion(potionId != null ? potionManageRepository.getReferenceById(potionId) : null);
+            req.setTargetMaterial(null);
+        }
+    	
         req.setRewardEnable(1); 
         req.setRequestDate(java.time.LocalDateTime.now());
         Request saved = requestRepository.save(req);
@@ -166,6 +179,26 @@ public class RequestManageController {
         return result;
     }
 
+    @GetMapping("/potion/search")
+    @ResponseBody
+    public List<Map<String, Object>> searchPotions(
+            @RequestParam(name = "q", required = false, defaultValue = "") String q) {
+
+        String keyword = (q == null) ? "" : q.trim();
+        List<Potion> list = potionManageRepository.searchByName(keyword);
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Potion p : list) {
+            Map<String, Object> row = new HashMap<>();
+            row.put("id",    p.getPotionId());
+            row.put("level", p.getPotionLevel());
+            row.put("name",  p.getPotionName());
+            row.put("photo", p.getPotionPhoto());
+            result.add(row);
+        }
+        return result;
+    }
+    
     @GetMapping("/{id}/update")
     public String updateForm(@PathVariable("id") Long id,
                              @RequestParam(name = "page", defaultValue = "1") int page,
@@ -190,6 +223,8 @@ public class RequestManageController {
     @Transactional
     public String update(@PathVariable("id") Long id,
                          Request form, 
+                         @RequestParam(name = "materialId", required = false) Long materialId,
+                         @RequestParam(name = "potionId",   required = false) Long potionId,
                          @RequestParam(name = "rewardMaterialId", required = false) List<Long> rewardMaterialIds,
                          @RequestParam(name = "rewardQty", required = false) List<Integer> rewardQtys,
                          @RequestParam(name = "page", defaultValue = "1") int page,
@@ -208,6 +243,15 @@ public class RequestManageController {
         origin.setRewardGold(form.getRewardGold());
         origin.setRewardEnable(1);
 
+        origin.setRequestItem(form.getRequestItem());
+        if (origin.getRequestItem() == Request.RequestItem.MATERIAL) {
+            origin.setTargetMaterial(materialId != null ? materialRepository.getReferenceById(materialId) : null);
+            origin.setTargetPotion(null);
+        } else if (origin.getRequestItem() == Request.RequestItem.POTION) {
+            origin.setTargetPotion(potionId != null ? potionManageRepository.getReferenceById(potionId) : null);
+            origin.setTargetMaterial(null);
+        }
+        
         List<MaterialReward> old = materialRewardRepository.findByRequest_RequestId(id);
         materialRewardRepository.deleteAll(old);
 

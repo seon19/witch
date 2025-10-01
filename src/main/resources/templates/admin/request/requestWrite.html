@@ -5,6 +5,14 @@
   <title>관리자 페이지</title>
   <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/main.css}" type="text/css">
   <link rel="stylesheet" th:href="@{/dist/css/cssAdmin/requestWrite.css}" type="text/css">
+  <style>
+  .tab-btn{ padding:6px 10px; border:1px solid #ddd; background:#f8f8f8; border-radius:8px; cursor:pointer }
+  .tab-btn.active{ background:#e8eefc; border-color:#8aa9ff }
+  #itemResult .row{ display:flex; align-items:center; justify-content:space-between; gap:8px;
+                    padding:8px; border:1px solid #eee; border-radius:8px; margin-bottom:8px; }
+  #itemResult .left{ display:flex; align-items:center; gap:10px; }
+  #itemResult img{ width:36px; height:36px; object-fit:cover; border-radius:6px; }
+</style>
 </head>
 <body>
 
@@ -52,6 +60,31 @@
             <td><textarea rows="4" style="width:100%; resize:none;" th:field="*{requestContent}" required></textarea></td>
           </tr>
 			
+		  <tr>
+			  <td>의뢰 아이템</td>
+			  <td>
+			    <button type="button" class="btn btn-primary" onclick="openItemModal()">아이템 선택</button>
+			<span id="selectedItem"
+			      th:with="
+			        it=${req.requestItem != null ? req.requestItem.name() : null},
+			        mname=${req.targetMaterial != null ? req.targetMaterial.materialName : ''},
+			        pname=${req.targetPotion != null ? req.targetPotion.potionName : ''}"
+			      th:text="${mode}=='update'
+			                 ? (it=='MATERIAL'
+			                      ? ('[재료] ' + mname)
+			                      : (it=='POTION' ? ('[포션] ' + pname) : '선택되지 않음'))
+			                 : '선택되지 않음'">
+			  선택되지 않음
+			</span>
+
+			    <input type="hidden" name="requestItem" id="requestItem" th:value="*{requestItem}">
+			    <input type="hidden" name="materialId"  id="reqMaterialId"
+			           th:value="${req.targetMaterial != null} ? ${req.targetMaterial.materialId} : ''">
+			    <input type="hidden" name="potionId"    id="reqPotionId"
+			           th:value="${req.targetPotion != null} ? ${req.targetPotion.potionId} : ''">
+			  </td>
+		  </tr>
+		  
 		  <tr>
 			  <td>요구 개수</td>
 			  <td><input type="text" min="1" step="1" name="goalCount" th:value="${mode}=='update' ? ${req.goalCount} : ''"></td>
@@ -128,11 +161,42 @@
   </div>
 </div>
 
+<div id="itemModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" style="display:none;">
+  <header>
+    <span>의뢰 아이템 선택</span>
+    <button type="button" class="btn small" onclick="closeItemModal()">닫기</button>
+  </header>
+
+  <div class="content">
+    <div class="tabs" style="display:flex; gap:6px; margin-bottom:10px;">
+      <button type="button" class="tab-btn active" data-type="MATERIAL">재료</button>
+      <button type="button" class="tab-btn"        data-type="POTION">포션</button>
+    </div>
+
+    <div style="display:flex; gap:8px; margin-bottom:12px;">
+      <input id="itemSearchInput" type="text" placeholder="이름으로 검색" style="flex:1;">
+      <button type="button" class="btn" onclick="doItemSearch()">검색</button>
+    </div>
+
+    <div id="itemResult"></div>
+  </div>
+
+  <div class="footer">
+    <button type="button" class="btn btn-secondary" onclick="closeItemModal()">닫기</button>
+  </div>
+</div>
+
 <script th:inline="javascript">
+  /* =================== 기존 상수 유지 =================== */
   const URL_MAT_SEARCH      = /*[[@{/admin/request/material/search}]]*/ '';
   const URL_MATERIAL_IMGDIR = /*[[@{/uploads/material/}]]*/ '';
   const URL_NO_IMAGE        = /*[[@{/images/noimage.png}]]*/ '';
 
+  /* =================== [NEW] 의뢰아이템(포션) 검색 상수 =================== */
+  const URL_POTION_SEARCH   = /*[[@{/admin/request/potion/search}]]*/ '';
+  const URL_POTION_IMGDIR   = /*[[@{/uploads/potion/}]]*/ '';
+
+  /* =================== 보상 아이템(기존 로직 그대로) =================== */
   const rewards = new Map();
 
   function openMaterialModal() {
@@ -178,7 +242,7 @@
 
       const nameWrap = document.createElement('div');
       nameWrap.innerHTML = `<div class="lev">Lv. ${m.level ?? '-'}</div><div style="font-weight:600;">${m.name}</div>`;
-  
+
       const qtyBox = document.createElement('input');
       qtyBox.type = 'number';
       qtyBox.min = '1';
@@ -279,8 +343,130 @@
     });
   }
 
+  /* =================== [NEW] 의뢰 아이템(무엇을?) 선택 =================== */
+
+  // 숨은 필드/표시 요소
+  const reqItemEl    = document.getElementById('requestItem');   // MATERIAL | POTION
+  const matIdEl      = document.getElementById('reqMaterialId'); // 재료 선택 시만 값
+  const potIdEl      = document.getElementById('reqPotionId');   // 포션 선택 시만 값
+  const selectedSpan = document.getElementById('selectedItem');
+
+  // 모달/검색 요소
+  const itemModal        = document.getElementById('itemModal');
+  const itemSearchInput  = document.getElementById('itemSearchInput');
+  const itemResult       = document.getElementById('itemResult');
+  let currentType = 'MATERIAL'; // 기본 탭
+
+  function openItemModal(){
+    const backdrop = document.getElementById('modalBackdrop');
+    if (backdrop) backdrop.style.display = 'block';
+    if (itemModal) itemModal.style.display = 'block';
+    currentType = 'MATERIAL';
+    syncTabButtons();
+    if (itemSearchInput) itemSearchInput.value = '';
+    doItemSearch();
+  }
+
+  function closeItemModal(){
+    const backdrop = document.getElementById('modalBackdrop');
+    if (backdrop) backdrop.style.display = 'none';
+    if (itemModal) itemModal.style.display = 'none';
+  }
+
+  function syncTabButtons(){
+    document.querySelectorAll('#itemModal .tab-btn').forEach(btn=>{
+      btn.classList.toggle('active', btn.dataset.type === currentType);
+    });
+  }
+
+  // 탭 클릭 이벤트
+  document.querySelectorAll('#itemModal .tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      currentType = btn.dataset.type; // MATERIAL | POTION
+      syncTabButtons();
+      if (itemSearchInput) itemSearchInput.value = '';
+      doItemSearch();
+    });
+  });
+
+  // 검색 실행
+  async function doItemSearch(){
+    if (!itemResult) return;
+    const q = (itemSearchInput?.value) || '';
+    const url = (currentType === 'MATERIAL')
+      ? (URL_MAT_SEARCH + '?q=' + encodeURIComponent(q))
+      : (URL_POTION_SEARCH + '?q=' + encodeURIComponent(q));
+
+    const res = await fetch(url, { headers:{'Accept':'application/json'}});
+    const rows = await res.json(); // [{id,name,level,photo},...]
+
+    itemResult.innerHTML = '';
+    if(!rows || rows.length === 0){
+      itemResult.innerHTML = '<div style="padding:16px;color:#666;">검색 결과가 없습니다.</div>';
+      return;
+    }
+
+    rows.forEach(r=>{
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML = `
+        <div class="left">
+          <img src="${r.photo ? (currentType==='MATERIAL' ? (URL_MATERIAL_IMGDIR + r.photo) : (URL_POTION_IMGDIR + r.photo)) : URL_NO_IMAGE}" alt="">
+          <div>
+            <div style="font-weight:600">${r.name}</div>
+            <div style="font-size:12px;color:#666">Lv. ${r.level ?? '-'}</div>
+          </div>
+        </div>
+        <button type="button" class="btn small">선택</button>
+      `;
+      row.querySelector('button').addEventListener('click', ()=>{
+        if(currentType === 'MATERIAL'){
+          if (reqItemEl) reqItemEl.value = 'MATERIAL';
+          if (matIdEl){ matIdEl.disabled = false; matIdEl.value = r.id; }
+          if (potIdEl){ potIdEl.disabled = true;  potIdEl.value = ''; }
+          if (selectedSpan) selectedSpan.textContent = `[재료] ${r.name}`;
+        }else{
+          if (reqItemEl) reqItemEl.value = 'POTION';
+          if (potIdEl){ potIdEl.disabled = false; potIdEl.value = r.id; }
+          if (matIdEl){ matIdEl.disabled = true;  matIdEl.value = ''; }
+          if (selectedSpan) selectedSpan.textContent = `[포션] ${r.name}`;
+        }
+        closeItemModal();
+      });
+      itemResult.appendChild(row);
+    });
+  }
+
+  // 엔터로 검색
+  itemSearchInput?.addEventListener('keydown', (e)=>{ if(e.key==='Enter') doItemSearch(); });
+
+  // 수정 화면 진입 시 hidden 상태 보정
+  (function initRequestItemFields(){
+    if (!reqItemEl) return;
+    const t = reqItemEl.value;
+    if(t === 'MATERIAL'){
+      if (matIdEl) { matIdEl.disabled = false; }
+      if (potIdEl) { potIdEl.disabled = true; potIdEl.value = ''; }
+    } else if(t === 'POTION'){
+      if (potIdEl) { potIdEl.disabled = false; }
+      if (matIdEl) { matIdEl.disabled = true; matIdEl.value = ''; }
+    }
+  })();
+
+  /* =================== 제출(기존 함수에 검증 추가) =================== */
   function submitRequest() {
     const f = document.requestForm;
+
+    // [NEW] 의뢰 아이템(무엇을?) 선택 검증
+    if (reqItemEl) {
+      const t = reqItemEl.value;
+      const mid = matIdEl?.value;
+      const pid = potIdEl?.value;
+      if(!t || (t==='MATERIAL' && !mid) || (t==='POTION' && !pid)){
+        alert('의뢰 아이템을 선택하세요.');
+        return;
+      }
+    }
 
     if (!f['requestLevel'].value) { alert('레벨을 선택하세요.'); f['requestLevel'].focus(); return; }
     if (!f['requestName'].value.trim()) { alert('의뢰명을 입력하세요.'); f['requestName'].focus(); return; }
@@ -307,6 +493,7 @@
     f.submit();
   }
 
+  /*=================== 보상 초기화(기존) ===================*/
   /*[# th:if="${mode}=='update'"]*/
   (function initRewardsFromServer() {
     /*[# th:each="ri : ${rewardItems}"]*/
@@ -321,7 +508,7 @@
     /*[/]*/
   })();
    /*[/]*/
-
 </script>
+
 </body>
 </html>
